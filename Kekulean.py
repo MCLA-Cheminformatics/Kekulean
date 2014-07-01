@@ -261,7 +261,7 @@ def perfectMatching(graph):
 		v = r.pop(0)
 		while v.visited == True and len(r) > 0:
 			v = r.pop(0)
-		if len(r) > 0:
+		if len(r) <= 0:
 			#The graph is Kekulean
 			break
 		v.visited = True
