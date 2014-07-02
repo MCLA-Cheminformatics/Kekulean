@@ -15,6 +15,11 @@ class Graph(object):
 		self.FriesNumber = 0
 		self.ClarsNumber = 0
 
+		self.rowCount = [0] * self.getNumberOfRows()
+		self.totalUpperBounds = 0
+
+		self.assignUpperBounds()
+
 	def getVertexGraph(self):
 		return self.vertexGraph
 	def getFaceGraph(self):
@@ -30,6 +35,8 @@ class Graph(object):
 		return self.vertexRoots
 	def setVertexRoots(self, newRoots):
 		self.vertexRoots = newRoots
+	def getRowUpperBonds(self, index):
+		return self.rowCount[index]
 	def getLastAddedPair(self):
 		return self.lastAddPair
 	def getFriesNumber(self):
@@ -217,7 +224,7 @@ class Graph(object):
 		for f in self.faceGraph:
 			x = f.getX() 
 			y = f.getY()
-			faceColor = 'white'
+			faceColor = 'gray'
 			#assign colors for faces
 			if f.isClars == True:
 				faceColor = 'blue'
@@ -263,9 +270,8 @@ class Graph(object):
 		for face in self.faceGraph:
 			if face.getY() != row:
 				string += "\n"
-				row = face.getY()
-			else:  	
-				string += " " + str(face.getX()) + " "
+				row = face.getY()  	
+			string += " " + str(face.getX()) + " "
 		return string
 
 	def debugString(self):
@@ -286,6 +292,29 @@ class Graph(object):
 			for f in row:
 				s += str(f) + " "
 		return s
+
+	def assignUpperBounds(self):
+		whiteCount = [0] * len(self.rowCount)
+		blackCount = [0] * len(self.rowCount)
+
+		for v in self.getVertexGraph():
+			#even y numbers mean the vertex is marked white on the graph
+			if v.getY() % 2 == 0:
+				index = v.getY() / 2
+				if index < len(whiteCount):
+					whiteCount[index] += 1
+			#The else implies that the vertex's y is odd, and thus the verex is marked black 
+			else:
+				index = (v.getY() - 1) / 2
+				if index < len(blackCount):
+					blackCount[index] += 1
+
+		for index in range(len(self.rowCount)):
+			count = abs(sum(whiteCount[0:index+1]) - sum(blackCount[0:index+1]))
+			#print count
+			self.rowCount[index] = count
+
+		self.totalUpperBounds = sum(self.rowCount)
 
 
 	def doubleBondsToString(self):

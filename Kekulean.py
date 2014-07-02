@@ -6,7 +6,7 @@ from Face import *
 from Vertex import *
 from Graph import *
 from VertexList import *
-from VerticalEdgeIterator import *
+#from VerticalEdgeIterator import *
 
 #function that reads in the graph returns a 2D string list of the graph
 def getInput(fileName):
@@ -236,7 +236,8 @@ def isKekulean(graph):
 	flag = False
 	if len(graph.getVertexGraph()) % 2 == 0:
 		if countPeaksAndValleys(graph.getFaceGraph()) == True:
-			pm = perfectMatching(graph)
+			#pm = perfectMatching(graph)
+			pm = isPM(graph)
 			if pm == True:
 				#print "The graph has a perfect matching"
 				flag = True
@@ -251,13 +252,155 @@ def isKekulean(graph):
 		#print "The graph has an uneven number of vertices: ", len(graph.getVertexGraph()) 
 	return flag
 
+def isPM(rootGraph):
+	found = False
+	v1 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP_LEFT]
+	v2 = rootGraph.getFaceGraph()[0].getVertices()[Face.BOTTOM_LEFT]
+	found = findPM(rootGraph, v1, v2)
+
+	if found == False:
+		v3 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP_LEFT]
+		v4 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP]
+		found = findPM(rootGraph, v3, v4)
+
+	return found
+
+def findPM(graph, v1, v2, matching=None, visitedVerts=None):
+	#matchingList = []
+	found = False
+
+	#graph.assignBond(v1, v2)
+
+	vList = VertexList()
+
+	matchings = {}
+	if matching is not None:
+		#print "matchings before", matchings
+		#print "parameter", matching
+		matchings = matching
+		#print "after", matchings
+		
+	matchings[v1] = v2
+	
+	visited = {}	
+	if visitedVerts is None:
+		for key in matchings.keys():
+			visited[key] = key
+			v = matchings[key]
+			visited[v] = v
+	else:
+		visited = visitedVerts
+
+	#print "matchings:", len(matchings)
+	#print "visited:", len(visited)
+
+	for v in graph.getVertexGraph():
+		if v in visited:#This means that v is part of the perfect matching
+			for n in v.getNeighbors().values():
+				if n not in visited:
+					#print "adding"
+					vList.add(n)
+				elif n in vList:
+					#print "removeing"
+					vList.remove(n)
+
+	#while len(vList) > 0:
+	while len(visited) < len(graph.getVertexGraph()) and found == False:
+		added = None
+		"""print "\nBonds"
+		for k, v in matchings.items():
+			print k.getX(), k.getY(), ":", v.getX(), v.getY()"""
+		#print "len:", len(matchingsList)
+		vertex = vList.pop()
+		#print "current V:", v.getX(), v.getY()
+		if vertex is None:
+			break
+
+		if checkNeighbors(vertex, visited) == False:
+			found = False
+			#print "not kekulean"
+			break
+
+		if vertex.getDegree() == 2:
+			neighbors = vertex.getNeighbors().values()
+			for v in neighbors:
+				if v not in visited:
+					matchings[vertex] = v
+					visited[vertex] = vertex
+					visited[v] = v
+					added = v
+
+		elif vertex.getDegree() == 3:
+			#print "in elif"
+			#print vertex
+			flag = False
+			for n in vertex.getNeighbors().values():
+				#if n in visited:
+					#print n, "is visisited"
+				if n not in visited:
+					#print n, "is not visisited"
+					if flag == False:
+						#print "first time", n 	
+						flag = True
+						matchings[vertex] = n
+						visited[vertex] = vertex
+						visited[n] = n
+						added = n
+					else:
+						#print "in the else in the elif"
+						#print n
+						newMatching = dict(matchings)
+						newVisited = dict(visited)
+
+						#print "before:", len(matchings)
+
+						del newMatching[vertex]
+						del newVisited[vertex]
+						del newVisited[added]
+
+						#print "after:", len(matchings)
+
+						newMatching[vertex] = n
+						newVisited[vertex] = vertex
+						newVisited[n] = n
+
+						found = findPM(graph, vertex, n, newMatching, newVisited)
+
+
+		if added is not None and found == False:
+			for n in added.getNeighbors().values():
+				if n not in visited:
+					if n not in vList:
+						#print "adding in while loop"
+						vList.add(n)
+					else:
+						pass#for some reason I think I want to add something here
+				elif n in vList:
+					#print "removeing"
+					vList.remove(n)
+		elif added is None:
+			#print "added is None"
+			break
+
+		vList.update(visited)
+
+		#print "unvisited count:", graph.unvisitedCount()
+	if len(matchings) == len(graph.getVertexGraph())/2:
+		 found = True
+	return found 
+ 
+
 def perfectMatching(graph):
-	r = getR(graph)
+	w = getW(graph)
+	r = getR(w)
 	hasPerfectMatching = True
+
+	graph.assignUpperBounds()
+	rowCount = graph.rowCount
 
 	matched = {}
 
-	while len(r) > 0:
+	while len(r) > 0 and hasPerfectMatching == True:
 		v = r.pop(0)
 		while v.visited == True and len(r) > 0:
 			v = r.pop(0)
@@ -280,60 +423,133 @@ def perfectMatching(graph):
 			right = None
 
 		isolated = isIsolated(v)
+		#print "\nCurrent Vertex:", v 
+		#print "there are", len(neighbors), "neighbors"
+		#for n in v.getNeighbors().values():
+		#	print "\t", n, ":", n.visited
+		#print "isolated:", isolated
+		#print "matchings thus far"
+		#for v1, v2 in matched.items():
+		#	print v1, ":", v2
+
+
+		found = False
 
 		if isolated == True:
 			hasPerfectMatching = False
-			break
-		if vertical is not None:
-			if vertical.visited != True:
-				matched[v] = vertical
-				vertical.visited = True
-			else:
+
+		elif vertical is not None:
+			if vertical.visited == False:
+				faces = vertical.getFaces() & v.getFaces()
+				index = faces.pop().getY()
+				if rowCount[index] > 0:
+					rowCount[index] -= 1
+					matched[v] = vertical
+					vertical.visited = True
+					found = True
+			elif found == False:
 				if left is not None:
-					if left.visited != True:
+					if left.visited == False:
 						matched[v] = left
 						left.visited = True
-				elif right is not None:
-					if right.visited != True:
+						found = True
+				if right is not None and found == False:
+					if right.visited == False:
 						matched[v] = right
 						right.visited = True
+						found = True
 		elif vertical is None:
 			if left is not None:
-				if left.visited != True:
+				if left.visited == False:
 						matched[v] = left
 						left.visited = True
-				elif right is not None:
-					if right.visited != True:
+						found = True
+				if right is not None and found == False:
+					if right.visited == False:
 						matched[v] = right
 						right.visited = True
+						found = True
 
+	#print "number of unmatched vertices:", graph.unvisitedCount()
 	return hasPerfectMatching
 
-def getR(graph):
-	r = []
-	for f in graph.getFaceGraph():
-		verts = f.getVertices()
-		for v in verts:
-			if v not in r:
-				v.rQueue = v.getX() - f.getY()
-				for vertex in r:
-					if v.rQueue < vertex.rQueue:
-						r.insert(r.index(vertex), v)
-						break
+def getW(graph):
+	w = []
+	l = []
+	
+	initVert = graph.getVertexGraph()[0]
+	initVert.w = True
+
+	l.append(initVert)
+	w.append(initVert)
+
+	while len(l) > 0:
+		#print "len of l:", len(l)
+		v = l.pop(0)
+		neighbors = v.getNeighbors()
+		left = None
+		vertical = None
+		right = None
+		for n in neighbors:
+			if n == Vertex.LEFT:
+				left = neighbors[n]
+				if left.w != True:
+					left.w = True
+					left.wx = v.wx - 1
+					#this implies that left is above the current vertex
+					if left.getY() < v.getY():
+						left.wy = v.wy + 1
+					#This imples that left is below the current verrtex
+					else:
+						left.wy = v.wy - 1
 				else:
-					r.append(v)
-		"""if verts[Face.TOP_LEFT] not in r:
-			r.append(verts[Face.TOP_LEFT])
-		if verts[Face.TOP] not in r:
-			r.append(verts[Face.TOP])
-		if verts[Face.TOP_RIGHT] not in r:
-			r.append(verts[Face.TOP_RIGHT])
-		if verts[Face.BOTTOM_RIGHT] not in r:
-			r.append(verts[Face.BOTTOM_RIGHT])
-		if verts[Face.BOTTOM] not in r:
-			r.append(verts[Face.BOTTOM])
-		if verts[Face.BOTTOM_LEFT] not in r:
-			r.append(verts[Face.BOTTOM_LEFT])"""
+					left = None
+			elif n == Vertex.RIGHT:
+				right = neighbors[n]
+				if right.w != True:
+					right.w = True
+					right.wx = v.wx + 1
+					#this implies that right is above the current vertex
+					if right.getY() < v.getY():
+						right.wy = v.wy + 1
+					#This imples that right is below the current verrtex
+					else:
+						right.wy = v.wy - 1
+				else:
+					right = None
+			elif n == Vertex.VERTICAL:
+				vertical = neighbors[n]
+				if vertical.w != True:
+					vertical.w = True
+					vertical.wx = v.wx
+					#this imples that vertical is above the current vertex
+					if vertical.getY() < v.getY():
+						vertical.wy = v.wy + 1
+					#this imples that vertical is below the current vertex
+					else:
+						vertical.wy = v.wy - 1
+				else:
+					vertical = None
+
+		addons = [left, right, vertical]
+		#added = 0
+		for a in addons:
+			if a is not None:
+				l.append(a)
+				w.append(a)
+				#added += 1
+		#print "added:", added
+	return w
+
+def getR(w):
+	r = []
+	for vw in w:
+		for vr in r:
+			if vw.wx < vr.wx:
+				r.insert(r.index(vr), vw)
+				break
+		else:
+			r.append(vw)
 	return r
 
 def isIsolated(v):
@@ -495,7 +711,9 @@ def assignBonds(graph, v1, v2, matching=None, visitedVerts=None):
 			print k.getX(), k.getY(), ":", v.getX(), v.getY()"""
 		#print "len:", len(matchingsList)
 		vertex = vList.pop()
-		#print "current V:", v.getX(), v.getY()
+		#print "current V:", vertex
+		if vertex is None:
+			break
 
 		if checkNeighbors(vertex, visited) == False:
 			notKekulean = True
@@ -573,13 +791,14 @@ def assignBonds(graph, v1, v2, matching=None, visitedVerts=None):
 
 def checkNeighbors(v, visited):
 	count = 0
+	#print v
 	for n in v.getNeighbors().values():
 		if n in visited:
 			count += 1
 	return count != v.getDegree()
 
 def assignMatching(rootGraph):
-	verticalEdgeIterator = VerticalEdgeIterator(rootGraph)
+	#verticalEdgeIterator = VerticalEdgeIterator(rootGraph)
 	
 	matchings = []
 	"""while verticalEdgeIterator.hasNext():		
@@ -667,6 +886,9 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 			displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
+			graphs = assignMatching(rootGraph)
+			print "Trying anyway, there are", len(graphs), "PM's"
+			displayGraphs(graphs)
 	else:
 		print "Graph is not connected"
 
@@ -833,7 +1055,7 @@ def testKekuleanThms():
 		perfectMatchingThm = isKekulean(randomGraph)
 
 		if nelsonThm != perfectMatchingThm:
-			print "conflict"
+			print "conflict found"
 			errorFile = open("conflict.txt", "w")
 			errorFile.write("Perfect matching: " + str(perfectMatchingThm) + " Nelson Thm: " + str(nelsonThm) + "\n")
 			errorFile.write(randomGraph.simpleToString())
@@ -843,7 +1065,7 @@ def testKekuleanThms():
 			t2 = time.time()
 			print "Time elapsed (in seconds): " + str(t2 - t1) + "\n"
 
-			print randomGraph.debugString()
+			#print randomGraph.debugString()
 			#for row in faceGraphToInts(randomFaces):
 			#	print len(row)
 
@@ -866,6 +1088,21 @@ def getRowEdgeCount(row):
 		if row[i] + 1 != f or f == None:
 			edgeCount += 1
 	return edgeCount
+
+def getMinRows(g):
+	minRows = {}
+	index = 0
+	minEdges = sys.maxint
+	for r in g:
+		edgeCount = getRowEdgeCount(r)
+		if edgeCount < minEdges:
+			minEdges = edgeCount
+			minRows.clear()
+			minRows[index] = r
+		elif edgeCount == minEdges:
+			minRows[index] = r
+		index += 1
+	return minRows
 	
 #counts up the number of peaks above each row and stores those values in a list at indexes that correspond to the the row of the graph
 def getPeaksAboveRows(g):
@@ -892,9 +1129,8 @@ def getPeaksAboveRows(g):
 #Theorem I devoloped
 def NelsonThm(peaks, g):
 	kekulean = True
-	for i in range(len(g)):
-		row = g[i]
-		#print "P: " + str(peaks[i]) + "Edges: " + str(getRowEdgeCount(row))
+	minRows = getMinRows(g)
+	for i, row in minRows.items():
 		if peaks[i] > getRowEdgeCount(row):
 			kekulean = False
 			break
@@ -911,7 +1147,7 @@ def isOldKekulean(graph):
 		
 	return kekulean
 
-def getUpperBonds(filename='graph.txt'):
+def getUpperBounds(filename='graph.txt'):
 	faceGraph = getInput(filename)
 	vertexGraph = makeVertexGraph(faceGraph)
 
@@ -974,6 +1210,6 @@ while True:
 	elif selection == 6:
 		testKekuleanThms()
 	elif selection == 7:
-		getUpperBonds()
+		getUpperBounds()
 	else:
 		sys.exit()

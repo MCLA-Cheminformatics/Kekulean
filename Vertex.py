@@ -12,6 +12,9 @@ class Vertex(object):
 		self.inQueue = False
 		self.root = None
 		self.rQueue = None
+		self.w = False
+		self.wx = 0
+		self.wy = 0
 
 	def addNeighbor(self, location, vertex):
 		self.neighbors[location] = vertex
