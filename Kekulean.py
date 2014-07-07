@@ -853,6 +853,7 @@ def displayGraphs(graphs):
 			print graph.toString()
 
 			print "Fries Number:", graph.getFriesNumber(), " Clars Number:", graph.getClarsNumber()
+			print "Clars-Fries Differential:", graph.getClarsFriesDiff()
 
 			print "Double Bonds Length:", len(graph.getDoubleBonds()) 
 			for v1, v2 in graph.getDoubleBonds().items():
@@ -875,20 +876,25 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 		vertexGraph = makeVertexGraph(faceGraph)
 
 		rootGraph = Graph(faceGraph, vertexGraph)
+
+		getUpperBounds(rootGraph)
+
 		kekulean = isKekulean(rootGraph)
 		if kekulean == True:
 			print "There are", len(vertexGraph), "vertices"
 
 			graphs = assignMatching(rootGraph)
-			print "There are", len(graphs), "PM's"
+			print "There are", len(graphs), "PM's"			
 
-			#graphs = assignFriesAndClars(graphs)
+			#must be 'fries' or 'clars'
+			funct = 'clars'
+			graphs = merge_sort(graphs, funct)
 			displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
 			graphs = assignMatching(rootGraph)
 			print "Trying anyway, there are", len(graphs), "PM's"
-			displayGraphs(graphs)
+			#displayGraphs(graphs)
 	else:
 		print "Graph is not connected"
 
@@ -1032,12 +1038,18 @@ def createManyKekuleans():
 		displayGraphs(graphList)
 
 def testKekuleanThms():
-	conflict = False
+	conflictFile = open("conflict.txt", "w")
+
+	interval = float(raw_input("How many hours would you like to run the program?"))
+
+	timeLimit = 3600 * interval
+	print "limit:", timeLimit
 
 	t1 = time.time()
+	t2 = time.time()
 
 	counter = 0
-	while conflict != True:
+	while t2 - t1 < timeLimit:
 		print "graph #" + str(counter)
 
 		#creates a face graphs
@@ -1055,25 +1067,14 @@ def testKekuleanThms():
 		perfectMatchingThm = isKekulean(randomGraph)
 
 		if nelsonThm != perfectMatchingThm:
-			print "conflict found"
-			errorFile = open("conflict.txt", "w")
-			errorFile.write("Perfect matching: " + str(perfectMatchingThm) + " Nelson Thm: " + str(nelsonThm) + "\n")
-			errorFile.write(randomGraph.simpleToString())
-			errorFile.close()
-			conflict = True
+			
+			conflictFile.write("Perfect matching: " + str(perfectMatchingThm) + " Nelson Thm: " + str(nelsonThm) + "\n")
+			conflictFile.write(randomGraph.simpleToString())
+			conflictFile.write("\n") 
 
-			t2 = time.time()
-			print "Time elapsed (in seconds): " + str(t2 - t1) + "\n"
-
-			#print randomGraph.debugString()
-			#for row in faceGraphToInts(randomFaces):
-			#	print len(row)
-
-		else:
-			pass
-			#print "no conflict"
-			#print randomGraph.simpleToString()
+		t2 = time.time()
 		counter += 1
+	conflictFile.close()
 
 #takes a row and returns a the number of vertical edges in that row
 def getRowEdgeCount(row):
@@ -1147,11 +1148,11 @@ def isOldKekulean(graph):
 		
 	return kekulean
 
-def getUpperBounds(filename='graph.txt'):
-	faceGraph = getInput(filename)
-	vertexGraph = makeVertexGraph(faceGraph)
+def getUpperBounds(graph):
+	#faceGraph = getInput(filename)
+	#vertexGraph = makeVertexGraph(faceGraph)
 
-	graph = Graph(faceGraph, vertexGraph)
+	#graph = Graph(faceGraph, vertexGraph)
 
 	kekulean = isKekulean(graph)
 	if kekulean == True: 
@@ -1186,6 +1187,46 @@ def getUpperBounds(filename='graph.txt'):
 	else:
 		print "The graph is not Kekulean"
 
+def merge_sort(l, funct):
+	if len(l) <= 1:
+		return l
+
+	left = []
+	right = []
+	middle = len(l)/2
+
+	for x in l[0:middle]:
+		left.append(x)
+	for x in l[middle::]:
+		right.append(x)
+
+	left = merge_sort(left, funct)
+	right = merge_sort(right, funct)
+
+	return merge(left, right, funct)
+
+def merge(left, right, funct):
+	result = []
+	while len(left) > 0 or len(right) > 0:
+		if len(left) > 0 and len(right) > 0:
+			if funct == 'fries':
+				l = left[0].getFriesNumber()
+				r = right[0].getFriesNumber()
+			elif funct == 'clars':
+				l = left[0].getClarsNumber()
+				r = right[0].getClarsNumber()
+
+			if l <= r:
+				result.append(left.pop(0))
+			else:
+				result.append(right.pop(0)) 
+		elif len(left) > 0:
+			result.append(left.pop(0))
+		elif len(right) > 0:
+			result.append(right.pop(0))
+
+	return result
+
 #The Main
 
 selection = 0
@@ -1210,6 +1251,8 @@ while True:
 	elif selection == 6:
 		testKekuleanThms()
 	elif selection == 7:
-		getUpperBounds()
+		l = [x for x in range(10)]
+		merge_sort(l)
+		#getUpperBounds()
 	else:
 		sys.exit()

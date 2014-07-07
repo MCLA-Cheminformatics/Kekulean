@@ -44,6 +44,9 @@ class Graph(object):
 	def getClarsNumber(self):
 		return self.ClarsNumber
 
+	def getClarsFriesDiff(self):
+		return float(self.ClarsNumber)/float(self.FriesNumber)
+
 	def assignBond(self, v1, v2):
 		self.doubleBonds[v1] = v2
 
