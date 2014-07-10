@@ -1,0 +1,2 @@
+Conjecture: Let H and G be two benzenoids with the same number of vertices. 
+Then the Clar number of H is less than or equal to the Clar number of G if and only if the number of Kekule structures for H is less than or equal to the number of Kekule structures for G.

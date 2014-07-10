@@ -837,7 +837,10 @@ def assignMatching(rootGraph):
 	return ret
 
 def assignFriesAndClars(graphs):
+	index = 0
 	for g in graphs:
+		print 'graph:', index
+		index += 1
 		g.assignFriesFaces()
 		g.assignClarsFaces()
 	return graphs
@@ -888,7 +891,7 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 
 			#must be 'fries' or 'clars'
 			funct = 'clars'
-			graphs = merge_sort(graphs, funct)
+			#graphs = merge_sort(graphs, funct)
 			displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
@@ -1227,15 +1230,81 @@ def merge(left, right, funct):
 
 	return result
 
+def testConjecture():
+	graphList = []
+
+	interval = float(raw_input("How many hours would you like to run the program? "))
+
+	timeLimit = 3600 * interval
+	print "limit:", timeLimit
+
+	t1 = time.time()
+	t2 = time.time()
+
+	counter = 0
+	while t2 - t1 < timeLimit:
+		print "graph #" + str(counter)
+
+		#creates a face graphs
+		randomFaces = createRandomGraph()
+		vertexGraph = []
+
+		#Finds connected graph
+		while len(vertexGraph) % 2 != 0 or len(vertexGraph) == 0 or countPeaksAndValleys(randomFaces) == False or isConnected(faceGraphToInts(randomFaces)) == False: 
+			randomFaces = createRandomGraph()
+			vertexGraph = makeVertexGraph(randomFaces)	
+
+		randomGraph = Graph(randomFaces, vertexGraph)
+
+		perfectMatchingThm = isKekulean(randomGraph)
+
+		if perfectMatchingThm == True:
+			structures = assignMatching(randomGraph)
+
+			graphList.append(structures)
+
+			#looks at everythng but the graph/structures just entered
+			for g in graphList[0:len(graphList)-2]:
+				print 'searching graphList'
+				#tests to see if the graphs have the same number of vertices 
+				if len(g[0].getVertexGraph()) == len(structures[0].getVertexGraph()):
+					#check the number of Kekule structures
+					if len(structures) <= len(g):
+						print 'finding clars'
+						gClars = findHighestClars(g)
+						hClars = findHighestClars(structures)
+
+						#compare clars numbers
+						if hClars <= gClars:
+							print 'Conjecture holds true'
+						else:
+							print 'Conjecture is false'
+							print g[0].simpleToString()
+							print '\n'
+							print structures[0].simpleToString()
+							print '\n'
+							break
+
+		t2 = time.time()
+		counter += 1
+
+def findHighestClars(graphs):
+	clars = 0
+	for g in graphs:
+		if g.getClarsNumber() > clars:
+			clars = g.getClarsNumber()
+	return clars
+
+
 #The Main
 
 selection = 0
 while True:
-	print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Don't click\n6) Test Nelson Thm\n7) Get Upper Bonds\n8) Quit"
+	print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Don't click\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
 	selection = int(raw_input("Selection: "))
 	while selection < 1 or selection > 8:
 		 print "\nInvalid response, please enter a proper selection."
-		 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Don't Click\n6) Test Nelson Thm\n7) Get Upper Bonds\n8) Quit"
+		 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Don't Click\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
 		 selection = int(raw_input("Selection: "))
 
 	if selection == 1:
@@ -1251,8 +1320,6 @@ while True:
 	elif selection == 6:
 		testKekuleanThms()
 	elif selection == 7:
-		l = [x for x in range(10)]
-		merge_sort(l)
-		#getUpperBounds()
+		testConjecture()
 	else:
 		sys.exit()

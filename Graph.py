@@ -8,6 +8,8 @@ class Graph(object):
 		self.faceGraph = faceGraph
 		self.vertexGraph = vertexGraph
 
+		self._assignFaceNeighbors()
+
 		self.doubleBonds = {}
 		self.vertexRoots = {}
 		self.lastAddPair = tuple()
@@ -134,8 +136,11 @@ class Graph(object):
 
 	#assigns Clars Faces the independent Fries Faces. Boes not yet find the heighest possible Clars number
 	def assignClarsFaces(self):
+		friesList = []
+
 		for face in self.faceGraph:
 			if face.isFries == True:
+				friesList.append(face)
 				neighbors = self._checkNeighbors(face)
 				#1 impies that there are Fries nieghbors, but no Clars
 				if neighbors == 1:
@@ -146,6 +151,50 @@ class Graph(object):
 					face.isClars = True
 					face.isIsolatedFries = True
 					self.ClarsNumber += 1
+
+		self._maxClars(friesList)
+
+	def _maxClars(self, friesList):
+		setList = []
+
+		for f in friesList:
+			s = set()
+			s.add(f)
+			friesList.remove(f)
+
+			neighbors = f.getNeighbors()
+			print 'max Clars:', len(neighbors)
+			for n in neighbors:
+				if n in friesList and n not in s:
+					neighbors.extend(n.getNeighbors())
+					s.add(n)
+					friesList.remove(n)
+			setList.append(s)
+
+		for s in setList:
+			if len(s) > 1:
+				oldClars, newClars = self._compareClarsFaces(s)
+				#print oldClars, newClars
+				if newClars > oldClars:
+					print 'flipping'
+					for f in s:
+						if f.isClars == True:
+							f.isClars = False
+							#self.ClarsNumber -= 1
+						else:
+							f.isClars = True
+							#self.ClarsNumber += 1
+
+	def _compareClarsFaces(self, flipped):
+		oldClars = 0
+		newClars = 0
+
+		for f in flipped:
+			if f.isClars == True:
+				oldClars += 1
+			else:
+				newClars += 1
+		return oldClars, newClars
 
 	#returns 0 if it borders no Fries/Clars; 1 if it border 1+ Fries faces; 2 if it borders 1+ Clars faces
 	def _checkNeighbors(self, face):
@@ -183,14 +232,53 @@ class Graph(object):
 		else:
 			return 0
 
+	def _assignFaceNeighbors(self):
+		for face in self.getFaceGraph():
+			n = []
+			#Top-left
+			f = self.findFace(face.getX()-1, face.getY()-1)
+			if f is not None:
+				n.append(f)
+			
+			#Top-right
+			f = self.findFace(face.getX(), face.getY()-1)
+			if f is not None:
+				n.append(f)
+			#Right
+			f = self.findFace(face.getX()+1, face.getY())
+			if f is not None:
+				n.append(f)
+			#Bottom-right
+			f = self.findFace(face.getX()+1, face.getY()+1)
+			if f is not None:
+				n.append(f)
+			#Bottom-left
+			f = self.findFace(face.getX(), face.getY()+1)
+			if f is not None:
+				n.append(f)
+			#Left
+			f = self.findFace(face.getX()-1, face.getY())
+			if f is not None:
+				n.append(f)
+
+			print 'neighbors:', len(n)
+			n = set(n)
+			print 'set neighors:', len(n)
+			print n 
+			face.setNeighbors(n)
+
+
 	#returns the face with the x- and y-coor given
 	def findFace(self, x, y):
-		face = None
-		for f in self.faceGraph:
-			if f.getX() == x and f.getY() == y:
-				face = f
-				break
-		return face
+		if x < 0 or y < 0:
+			return None
+		else:
+			face = None
+			for f in self.faceGraph:
+				if f.getX() == x and f.getY() == y:
+					face = f
+					break
+			return face
 
 	#checks if the graph structure is kekulean or not, knowning that the root graph is Kekulean
 	def checkKekulean(self):
@@ -234,7 +322,9 @@ class Graph(object):
 			elif f.isFries == True:
 				faceColor = 'green'
 
-			points = [0 + x*20 - y*10, 10 + y*30, 10 + x*20 - y*10, 0 + y*30, 20 + x*20 - y*10, 10 + y*30, 20 + x*20 - y*10, 30 + y*30, 10 + x*20 - y*10, 40 + y*30, 0 + x*20 - y*10, 30 + y*30]
+			xoffset = 50
+
+			points = [0 + x*20 - y*10 + xoffset, 10 + y*30, 10 + x*20 - y*10 + xoffset, 0 + y*30, 20 + x*20 - y*10 + xoffset, 10 + y*30, 20 + x*20 - y*10 + xoffset, 30 + y*30, 10 + x*20 - y*10 + xoffset, 40 + y*30, 0 + x*20 - y*10 + xoffset, 30 + y*30]
 
 			#draw hexagons
 			canvas.create_polygon(points, outline='black', fill=faceColor, width=2)
@@ -244,9 +334,9 @@ class Graph(object):
 			for pair in pairs:
 				#paint pair
 				x1, y1, x2, y2 = pair
-				x1 += x*20 - y*10
+				x1 += x*20 - y*10 + xoffset
 				y1 += y*30
-				x2 += x*20 - y*10
+				x2 += x*20 - y*10 + xoffset
 				y2 += y*30
 				canvas.create_line(x1, y1, x2, y2, fill='red', width=3)
 
