@@ -6,6 +6,7 @@ from Face import *
 from Vertex import *
 from Graph import *
 from VertexList import *
+from ConjectureData import *
 #from VerticalEdgeIterator import *
 
 #function that reads in the graph returns a 2D string list of the graph
@@ -829,6 +830,7 @@ def assignMatching(rootGraph):
 		#g = Graph(rootGraph.getFaceGraph(), rootGraph.getVertexGraph())
 		g = copy.copy(rootGraph)
 		g.faceGraph = createNewFaceGraph(rootGraph.getFaceGraph())
+		g._assignFaceNeighbors()
 		g.setDoubleBonds(m)
 		ret.append(g)
 
@@ -837,10 +839,7 @@ def assignMatching(rootGraph):
 	return ret
 
 def assignFriesAndClars(graphs):
-	index = 0
 	for g in graphs:
-		print 'graph:', index
-		index += 1
 		g.assignFriesFaces()
 		g.assignClarsFaces()
 	return graphs
@@ -891,7 +890,7 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 
 			#must be 'fries' or 'clars'
 			funct = 'clars'
-			#graphs = merge_sort(graphs, funct)
+			graphs = merge_sort(graphs, funct)
 			displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
@@ -1232,6 +1231,7 @@ def merge(left, right, funct):
 
 def testConjecture():
 	graphList = []
+	conflict = False
 
 	interval = float(raw_input("How many hours would you like to run the program? "))
 
@@ -1242,7 +1242,7 @@ def testConjecture():
 	t2 = time.time()
 
 	counter = 0
-	while t2 - t1 < timeLimit:
+	while t2 - t1 < timeLimit and conflict == False:
 		print "graph #" + str(counter)
 
 		#creates a face graphs
@@ -1261,29 +1261,32 @@ def testConjecture():
 		if perfectMatchingThm == True:
 			structures = assignMatching(randomGraph)
 
-			graphList.append(structures)
+			#must be 'fries' or 'clars'
+			funct = 'clars'
+			structures = merge_sort(structures, funct)
 
-			#looks at everythng but the graph/structures just entered
-			for g in graphList[0:len(graphList)-2]:
-				print 'searching graphList'
-				#tests to see if the graphs have the same number of vertices 
-				if len(g[0].getVertexGraph()) == len(structures[0].getVertexGraph()):
-					#check the number of Kekule structures
-					if len(structures) <= len(g):
-						print 'finding clars'
-						gClars = findHighestClars(g)
-						hClars = findHighestClars(structures)
+			h = ConjectureData(len(structures[0].getVertexGraph()), structures[-1].getClarsNumber(), len(structures)) 
+			h.setString(structures[0].simpleToString())
 
-						#compare clars numbers
-						if hClars <= gClars:
-							print 'Conjecture holds true'
-						else:
-							print 'Conjecture is false'
-							print g[0].simpleToString()
-							print '\n'
-							print structures[0].simpleToString()
-							print '\n'
+
+			# in this case, we consider conjectureData to be graph H for the conjecture
+			for g in graphList:
+				if h.getNumVertices() == h.getNumVertices():
+					if h.getNumStructures() <= g.getNumStructures():
+						if h.getClarsNumber() > g.getClarsNumber():
+							print 'Conjecture is false:'
+							print 'graph H:'
+							print h
+							print '\ngraph G:'
+							print g
+							conflict = True
 							break
+						else:
+							print 'Conjecture holds true'
+
+			graphList.append(h)
+
+
 
 		t2 = time.time()
 		counter += 1

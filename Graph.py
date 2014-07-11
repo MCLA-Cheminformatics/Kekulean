@@ -163,7 +163,7 @@ class Graph(object):
 			friesList.remove(f)
 
 			neighbors = f.getNeighbors()
-			print 'max Clars:', len(neighbors)
+			#print 'max Clars:', len(neighbors)
 			for n in neighbors:
 				if n in friesList and n not in s:
 					neighbors.extend(n.getNeighbors())
@@ -176,7 +176,7 @@ class Graph(object):
 				oldClars, newClars = self._compareClarsFaces(s)
 				#print oldClars, newClars
 				if newClars > oldClars:
-					print 'flipping'
+					#print 'flipping'
 					for f in s:
 						if f.isClars == True:
 							f.isClars = False
@@ -261,10 +261,8 @@ class Graph(object):
 			if f is not None:
 				n.append(f)
 
-			print 'neighbors:', len(n)
-			n = set(n)
-			print 'set neighors:', len(n)
-			print n 
+			#print 'neighbors:', len(n)
+			#print n 
 			face.setNeighbors(n)
 
 

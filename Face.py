@@ -17,7 +17,7 @@ class Face(object):
 		self.isClars = False
 		self.isIsolatedFries = False
 
-		self.neighbors = set()
+		self.neighbors = []
 
 	def addVertex(self, location, vertex):
 		self.vertices[location] = vertex
@@ -31,9 +31,7 @@ class Face(object):
 		return self.y
 	def setNeighbors(self, n):
 		self.neighbors = n
-		print 'in Face class:',len(self.neighbors)
 	def getNeighbors(self):
-		print 'returning neighbors', len(self.neighbors)
 		return self.neighbors
 
 	def __str__(self):
