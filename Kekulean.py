@@ -1275,9 +1275,9 @@ def testConjecture():
 					if h.getNumStructures() <= g.getNumStructures():
 						if h.getClarsNumber() > g.getClarsNumber():
 							print 'Conjecture is false:'
-							print 'graph H:'
+							print 'graph H: Clars:', h.getClarsNumber(), "Number of Structures:", h.getNumStructures() 
 							print h
-							print '\ngraph G:'
+							print '\ngraph G: Clars:', g.getClarsNumber(), "Number of Structures:", g.getNumStructures()
 							print g
 							conflict = True
 							break
