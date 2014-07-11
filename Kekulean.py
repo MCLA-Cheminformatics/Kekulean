@@ -1269,9 +1269,8 @@ def testConjecture():
 			h.setString(structures[0].simpleToString())
 
 
-			# in this case, we consider conjectureData to be graph H for the conjecture
 			for g in graphList:
-				if h.getNumVertices() == h.getNumVertices():
+				if h.getNumVertices() == g.getNumVertices():
 					if h.getNumStructures() <= g.getNumStructures():
 						if h.getClarsNumber() > g.getClarsNumber():
 							print 'Conjecture is false:'
