@@ -1223,8 +1223,8 @@ def testConjecture():
 			structures = assignMatching(randomGraph)
 
 			#must be 'fries' or 'clars'
-			funct = 'clars'
-			structures = merge_sort(structures, funct)
+			Graph.comparison = 'clars'
+			structures.sort()
 
 			h = ConjectureData(len(structures[0].getVertexGraph()), structures[-1].getClarsNumber(), len(structures)) 
 			h.setString(structures[0].simpleToString())
