@@ -7,7 +7,7 @@ from Vertex import *
 from Graph import *
 from VertexList import *
 from ConjectureData import *
-import Image, ImageDraw
+from PIL import Image, ImageDraw
 import math
 #from VerticalEdgeIterator import *
 
@@ -20,11 +20,11 @@ def getInput(fileName):
 	y = 0
 	while len(row) > 0:
 		row = row.replace('\n', '')
-		row = row.split(";")		
+		row = row.split(" ")		
 		
 		for i in range(len(row)):
-			x = row[i].split(',')
-			faceGraph.append((Face(int(x[1]), y)))
+			x = row[i]
+			faceGraph.append((Face(int(x), y)))
 
 		row = inputFile.readline()
 		y += 1
