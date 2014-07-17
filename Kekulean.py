@@ -7,6 +7,8 @@ from Vertex import *
 from Graph import *
 from VertexList import *
 from ConjectureData import *
+import Image, ImageDraw
+import math
 #from VerticalEdgeIterator import *
 
 #function that reads in the graph returns a 2D string list of the graph
@@ -270,8 +272,6 @@ def findPM(graph, v1, v2, matching=None, visitedVerts=None):
 	#matchingList = []
 	found = False
 
-	#graph.assignBond(v1, v2)
-
 	vList = VertexList()
 
 	matchings = {}
@@ -390,7 +390,6 @@ def findPM(graph, v1, v2, matching=None, visitedVerts=None):
 		 found = True
 	return found 
  
-
 def perfectMatching(graph):
 	w = getW(graph)
 	r = getR(w)
@@ -474,85 +473,6 @@ def perfectMatching(graph):
 	#print "number of unmatched vertices:", graph.unvisitedCount()
 	return hasPerfectMatching
 
-def getW(graph):
-	w = []
-	l = []
-	
-	initVert = graph.getVertexGraph()[0]
-	initVert.w = True
-
-	l.append(initVert)
-	w.append(initVert)
-
-	while len(l) > 0:
-		#print "len of l:", len(l)
-		v = l.pop(0)
-		neighbors = v.getNeighbors()
-		left = None
-		vertical = None
-		right = None
-		for n in neighbors:
-			if n == Vertex.LEFT:
-				left = neighbors[n]
-				if left.w != True:
-					left.w = True
-					left.wx = v.wx - 1
-					#this implies that left is above the current vertex
-					if left.getY() < v.getY():
-						left.wy = v.wy + 1
-					#This imples that left is below the current verrtex
-					else:
-						left.wy = v.wy - 1
-				else:
-					left = None
-			elif n == Vertex.RIGHT:
-				right = neighbors[n]
-				if right.w != True:
-					right.w = True
-					right.wx = v.wx + 1
-					#this implies that right is above the current vertex
-					if right.getY() < v.getY():
-						right.wy = v.wy + 1
-					#This imples that right is below the current verrtex
-					else:
-						right.wy = v.wy - 1
-				else:
-					right = None
-			elif n == Vertex.VERTICAL:
-				vertical = neighbors[n]
-				if vertical.w != True:
-					vertical.w = True
-					vertical.wx = v.wx
-					#this imples that vertical is above the current vertex
-					if vertical.getY() < v.getY():
-						vertical.wy = v.wy + 1
-					#this imples that vertical is below the current vertex
-					else:
-						vertical.wy = v.wy - 1
-				else:
-					vertical = None
-
-		addons = [left, right, vertical]
-		#added = 0
-		for a in addons:
-			if a is not None:
-				l.append(a)
-				w.append(a)
-				#added += 1
-		#print "added:", added
-	return w
-
-def getR(w):
-	r = []
-	for vw in w:
-		for vr in r:
-			if vw.wx < vr.wx:
-				r.insert(r.index(vr), vw)
-				break
-		else:
-			r.append(vw)
-	return r
-
 def isIsolated(v):
 	count = 0
 	neighbors = v.getNeighbors().values()
@@ -561,7 +481,6 @@ def isIsolated(v):
 			if n.visited == True:
 				count += 1
 	return count == v.getDegree()
-
 
 #Counts up all the peaks and valleys of the graph g and returns True if the peak count equals the valley count
 def countPeaksAndValleys(graph):
@@ -617,39 +536,6 @@ def searchRow(f, up, faceGraph, rowNum):
 			if row.count(f) == 0 and row.count(f+1) == 0:
 				flag = True
 	return flag
-
-
-def createNewGraph(oldGraph):
-	#make a new faceGraph
-	oldFace = oldGraph.getFaceGraph()
-	newFace = []
-
-	for i in range(len(oldFace)):
-		newFace.append(Face(oldFace[i].getX(), oldFace[i].getY()))
-
-	#create the vertexGraph
-	newVertexGraph = makeVertexGraph(newFace)
-
-	#add roots to vertices
-	for i in range(len(newVertexGraph)):
-		newVertexGraph[i].root = oldGraph.getVertexGraph()[i].root
-
-	#create the new root graph
-	newRoot = Graph(newFace, newVertexGraph)
-	
-	#re-create the double bonds 
-	if len(oldGraph.getDoubleBonds()) > 0:
-		newDoubleBonds = createNewDoubleBonds(oldGraph, newRoot)
-
-	return newRoot
-
-def createNewDoubleBonds(oldGraph, newGraph):
-	v1, v2 = oldGraph.getLastAddedPair()
-	for oldVertex, oldPair in oldGraph.getDoubleBonds().items():
-		if oldVertex != v1 and oldPair != v2:
-			newVertex = findVertex(oldVertex.getX(), oldVertex.getY(), newGraph.getVertexGraph())
-			newPair = findVertex(oldPair.getX(), oldPair.getY(), newGraph.getVertexGraph())
-			newGraph.assignBond(newVertex, newPair)
 
 def createNewFaceGraph(rootFace):
 	oldFace = rootFace
@@ -819,10 +705,10 @@ def assignMatching(rootGraph):
 	m2 = assignBonds(rootGraph, v3, v4)
 	matchings.extend(m2)
 
-	matchingSet = removeDuplicates(matchings)
+	#matchingSet = removeDuplicates(matchings)
 
 	matched = []
-	for m in matchingSet:
+	for m in matchings:
 		matched.append(m.getMatching())
 
 	ret = []
@@ -846,25 +732,69 @@ def assignFriesAndClars(graphs):
 
 def displayGraphs(graphs):
 	if len(graphs) > 0:
-		index = int(raw_input("what graph do you want to look at? "))
-		while index != -1:
-			
+		index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))
+		while index >= 0:
+			index -= 1
 			graph = graphs[index]
 
 			print "Graph", index
 			print graph.toString()
-
-			print "Fries Number:", graph.getFriesNumber(), " Clars Number:", graph.getClarsNumber()
-			print "Clars-Fries Differential:", graph.getClarsFriesDiff()
-
-			print "Double Bonds Length:", len(graph.getDoubleBonds()) 
-			for v1, v2 in graph.getDoubleBonds().items():
-				print v1.getX(), ",", v1.getY(), ":", v2.getX(), ",", v2.getY()
-			print "\n"
 			
 			graph.displayGraph()
 			print "There are", len(graphs), "Kekule structures"
-			index = int(raw_input("what graph do you want to look at? "))
+			index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))
+
+def savePNG(graphs, fileName):
+	#set up PIL stuff 
+	width = graphs[0].getWidth() * int(math.ceil(float(len(graphs))/20))
+	#(len(graphs)+1)
+	height = 20 * graphs[0].getNumberOfRows() * 40
+
+	image = Image.new("RGB", (width, height), (255,255,255))
+	draw = ImageDraw.Draw(image)
+
+	#colors
+	gray = (211, 211, 211)
+	black = (0, 0, 0)
+	red = (255, 0 ,0)
+	green = (0, 255, 0)
+	blue = (0, 0, 255)
+
+	graphNumber = 0
+
+	for g in graphs:
+		for f in g.getFaceGraph():
+			x = f.getX() 
+			y = f.getY()
+			faceColor = gray
+			#assign colors for faces
+			if f.isClars == True:
+				faceColor = blue
+			elif f.isFries == True:
+				faceColor = green
+
+			xoffset = g.getXOffset() + g.getWidth() * (int(math.floor(float(graphNumber) / 20)))
+			yoffset = graphNumber % 20 * g.getNumberOfRows() * 40 + 15
+			
+			points = [0 + x*20 - y*10 + xoffset, 10 + y*30 +yoffset, 10 + x*20 - y*10 + xoffset, 0 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 10 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset, 10 + x*20 - y*10 + xoffset, 40 + y*30 + yoffset, 0 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset]
+
+			#draw hexagons
+			draw.polygon(points, outline=black, fill=faceColor)
+
+			pairs = g.getBondedVertices(f)
+
+			for pair in pairs:
+				#paint pair
+				x1, y1, x2, y2 = pair
+				x1 += x*20 - y*10 + xoffset
+				y1 += y*30 + yoffset
+				x2 += x*20 - y*10 + xoffset
+				y2 += y*30 + yoffset
+				draw.line((x1, y1, x2, y2), fill=red, width=2)
+		graphNumber += 1
+
+	filename = fileName
+	image.save(filename)
 
 def analyzeGraphFromFile(fileName="graph.txt"):
 	faceGraph = getInput(fileName)
@@ -879,8 +809,6 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 
 		rootGraph = Graph(faceGraph, vertexGraph)
 
-		getUpperBounds(rootGraph)
-
 		kekulean = isKekulean(rootGraph)
 		if kekulean == True:
 			print "There are", len(vertexGraph), "vertices"
@@ -889,8 +817,20 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 			print "There are", len(graphs), "PM's"			
 
 			#must be 'fries' or 'clars'
-			funct = 'clars'
-			graphs = merge_sort(graphs, funct)
+			#add that to a static feild
+			#graphs = merge_sort(graphs)
+			graphs.sort()
+
+			graphs[0].printUpperBounds()
+
+			#save graphs as PNG file
+			savePNG(graphs, "graphs - Fries.png")
+
+			Graph.comparison = 'clars'
+			graphs.sort()
+
+			savePNG(graphs, "graphs - Clars.png")
+
 			displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
@@ -957,14 +897,24 @@ def createRandomKekulean():
 		vertexGraph = makeVertexGraph(randomFaces)
 		randomGraph = Graph(randomFaces, vertexGraph)
 
+	print "There are", len(vertexGraph), "vertices"
+
 	graphs = assignMatching(randomGraph)
+	graphs.sort()
 
 	if len(graphs) > 0:
+		#save graphs as PNG file
+		savePNG(graphs, "graphs - Fries.png")
+
+		Graph.comparison = 'clars'
+		graphs.sort()
+
+		savePNG(graphs, "graphs - Clars.png")
+		
 		print "There are", len(graphs), "Kekulean structures"
-		graphs = assignFriesAndClars(graphs)
 		displayGraphs(graphs)
 	else:
-		print "error - see error.txt for graph"
+		print "error - Graph is Kekulean but has no perfect matching - see error.txt for graph"
 		errorFile = open("error.txt", "w")
 		errorFile.write(randomGraph.simpleToString() + '\n')
 
@@ -991,7 +941,7 @@ def getRow(rl, rowNum):
 				r.append(Face(j, rowNum))
 	return r
 
-def removeDuplicates(matchings):
+"""def removeDuplicates(matchings):
 	for i in matchings:
 		for j in matchings:
 			if i != j: 
@@ -999,7 +949,7 @@ def removeDuplicates(matchings):
 					#This implies that the two graphs match one-for-one
 					print "deleting"
 					del matchings[matchings.index(j)]
-	return matchings
+	return matchings"""
 
 def createManyKekuleans():
 	graphs = [] #list of kekulean graphs 
@@ -1030,13 +980,13 @@ def createManyKekuleans():
 		graphs.append(randomGraph)
 
 
-
 	for g in graphs:
 		graphList.extend(assignMatching(g))
 
+	graphList.sort()
+
 	if len(graphList) > 0:
 		print "There are", len(graphList), "Kekulean structures"
-		graphList = assignFriesAndClars(graphList)
 		displayGraphs(graphList)
 
 def testKekuleanThms():
@@ -1188,46 +1138,6 @@ def getUpperBounds(graph):
 
 	else:
 		print "The graph is not Kekulean"
-
-def merge_sort(l, funct):
-	if len(l) <= 1:
-		return l
-
-	left = []
-	right = []
-	middle = len(l)/2
-
-	for x in l[0:middle]:
-		left.append(x)
-	for x in l[middle::]:
-		right.append(x)
-
-	left = merge_sort(left, funct)
-	right = merge_sort(right, funct)
-
-	return merge(left, right, funct)
-
-def merge(left, right, funct):
-	result = []
-	while len(left) > 0 or len(right) > 0:
-		if len(left) > 0 and len(right) > 0:
-			if funct == 'fries':
-				l = left[0].getFriesNumber()
-				r = right[0].getFriesNumber()
-			elif funct == 'clars':
-				l = left[0].getClarsNumber()
-				r = right[0].getClarsNumber()
-
-			if l <= r:
-				result.append(left.pop(0))
-			else:
-				result.append(right.pop(0)) 
-		elif len(left) > 0:
-			result.append(left.pop(0))
-		elif len(right) > 0:
-			result.append(right.pop(0))
-
-	return result
 
 def testConjecture():
 	graphList = []

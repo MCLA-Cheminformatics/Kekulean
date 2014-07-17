@@ -2,7 +2,12 @@ from Face import *
 from Vertex import *
 from Tkinter import *
 
+#add proper support for the R and W
+#add proper support for sorting
+#make comparison a static member
 class Graph(object):
+
+	comparison = 'fries'
 
 	def __init__(self, faceGraph, vertexGraph):
 		self.faceGraph = faceGraph
@@ -19,6 +24,10 @@ class Graph(object):
 
 		self.rowCount = [0] * self.getNumberOfRows()
 		self.totalUpperBounds = 0
+
+		self.leftMostFace = None
+		self.rightMostFace = None
+		self.rankFaces()
 
 		self.assignUpperBounds()
 
@@ -48,17 +57,6 @@ class Graph(object):
 
 	def getClarsFriesDiff(self):
 		return float(self.ClarsNumber)/float(self.FriesNumber)
-
-	def assignBond(self, v1, v2):
-		self.doubleBonds[v1] = v2
-
-		v1.visited = True
-		v2.visited = True
-
-		self.vertexRoots[v1.root] = v2.root
-		self.vertexRoots[v2.root] = v1.root 
-
-		self.lastAddPair = (v1, v2)
 
 	def assignFriesFaces(self):
 		for f in self.faceGraph:
@@ -180,10 +178,10 @@ class Graph(object):
 					for f in s:
 						if f.isClars == True:
 							f.isClars = False
-							#self.ClarsNumber -= 1
+							self.ClarsNumber -= 1
 						else:
 							f.isClars = True
-							#self.ClarsNumber += 1
+							self.ClarsNumber += 1
 
 	def _compareClarsFaces(self, flipped):
 		oldClars = 0
@@ -265,7 +263,6 @@ class Graph(object):
 			#print n 
 			face.setNeighbors(n)
 
-
 	#returns the face with the x- and y-coor given
 	def findFace(self, x, y):
 		if x < 0 or y < 0:
@@ -294,6 +291,124 @@ class Graph(object):
 
 		return len(self.getDoubleBonds()) == len(self.getVertexGraph())/2
 
+	def getW(self):
+		w = []
+		l = []
+		
+		initVert = self.getVertexGraph()[0]
+		initVert.w = True
+
+		l.append(initVert)
+		w.append(initVert)
+
+		while len(l) > 0:
+			#print "len of l:", len(l)
+			v = l.pop(0)
+			neighbors = v.getNeighbors()
+			left = None
+			vertical = None
+			right = None
+			for n in neighbors:
+				if n == Vertex.LEFT:
+					left = neighbors[n]
+					if left.w != True:
+						left.w = True
+						left.wx = v.wx - 1
+						#this implies that left is above the current vertex
+						if left.getY() < v.getY():
+							left.wy = v.wy + 1
+						#This imples that left is below the current verrtex
+						else:
+							left.wy = v.wy - 1
+					else:
+						left = None
+				elif n == Vertex.RIGHT:
+					right = neighbors[n]
+					if right.w != True:
+						right.w = True
+						right.wx = v.wx + 1
+						#this implies that right is above the current vertex
+						if right.getY() < v.getY():
+							right.wy = v.wy + 1
+						#This imples that right is below the current verrtex
+						else:
+							right.wy = v.wy - 1
+					else:
+						right = None
+				elif n == Vertex.VERTICAL:
+					vertical = neighbors[n]
+					if vertical.w != True:
+						vertical.w = True
+						vertical.wx = v.wx
+						#this imples that vertical is above the current vertex
+						if vertical.getY() < v.getY():
+							vertical.wy = v.wy + 1
+						#this imples that vertical is below the current vertex
+						else:
+							vertical.wy = v.wy - 1
+					else:
+						vertical = None
+
+			addons = [left, right, vertical]
+			#added = 0
+			for a in addons:
+				if a is not None:
+					l.append(a)
+					w.append(a)
+					#added += 1
+			#print "added:", added
+		return w
+
+	def getR(self, w):
+		r = []
+		for vw in w:
+			for vr in r:
+				if vw.wx < vr.wx:
+					r.insert(r.index(vr), vw)
+					break
+			else:
+				r.append(vw)
+		return r
+
+	def rankFaces(self):
+		ranking = {}
+		for f in self.faceGraph:
+			ranking[f] = f.getX() - f.getY()
+
+		minRank = sys.maxint
+		maxRank = -sys.maxint - 1
+		minFace = None
+		maxFace = None
+		for f, rank in ranking.items():
+			if rank < minRank:
+				minRank = rank
+				minFace = f 
+			if rank > maxRank:
+				maxRank = rank
+				maxFace = f
+
+		self.leftMostFace = minFace
+		self.rightMostFace = maxFace
+
+	def getXOffset(self):
+		x = self.leftMostFace.getX()
+		y = self.leftMostFace.getY()
+
+		return 10 * -(x - y) + 10
+
+	def getWidth(self):
+		leftX = self.getXOffset()
+		#print 'leftX:', leftX
+
+		x = self.rightMostFace.getX()
+		y = self.rightMostFace.getY() 
+
+		#print 'x:', x, 'y:', y
+
+		rightX = 20 * -(x - y)
+		#print 'rightX', rightX 
+
+		return 2 * (abs(leftX) + abs(rightX)) 
 
 	def displayGraph(self):
 		root = Tk()
@@ -320,7 +435,7 @@ class Graph(object):
 			elif f.isFries == True:
 				faceColor = 'green'
 
-			xoffset = 50
+			xoffset = self.getXOffset()
 
 			points = [0 + x*20 - y*10 + xoffset, 10 + y*30, 10 + x*20 - y*10 + xoffset, 0 + y*30, 20 + x*20 - y*10 + xoffset, 10 + y*30, 20 + x*20 - y*10 + xoffset, 30 + y*30, 10 + x*20 - y*10 + xoffset, 40 + y*30, 0 + x*20 - y*10 + xoffset, 30 + y*30]
 
@@ -341,19 +456,21 @@ class Graph(object):
 		mainloop()
 
 	def toString(self):
-		row = 0
-		string = ""
-		for face in self.faceGraph:
-			if face.getY() != row:
-				string += "\n"
-				row = face.getY()
-			if face.isClars == True:
-				string += " (" + str(face.getX()) + "\\C) "
-			elif face.isFries == True:
-				string += " (" + str(face.getX()) + "\\F) "
-			else:  	
-				string += " " + str(face.getX()) + " "
+		string = '' 
+		string = "Fries Number: " + str(self.getFriesNumber()) + " Clars Number: " + str(self.getClarsNumber()) + '\n'
+		string += "Clars-Fries Differential: " + str(self.getClarsFriesDiff()) + '\n'
+		string += "There are " + str(len(self.vertexGraph)) + " vertices" + '\n'
+
+		string += "Number of Double Bonds: " + str(len(self.getDoubleBonds())) + '\n'
+		for v1, v2 in self.getDoubleBonds().items():
+			string += str(v1) + ':' + str(v2) + '\n'	
 		return string
+
+	def printUpperBounds(self):
+		print "Upper Bounds of the graph from top to bottom"
+		for row in range(len(self.rowCount)):
+			print "Row " + str(row + 1) + ":", self.rowCount[row]
+		print "Total Upper Bounds:", self.totalUpperBounds 
 	
 	def simpleToString(self):
 		row = 0
@@ -364,25 +481,6 @@ class Graph(object):
 				row = face.getY()  	
 			string += " " + str(face.getX()) + " "
 		return string
-
-	def debugString(self):
-		rowCount = 0
-		row = []
-		intG = []
-		s = ''
-
-		for face in self.faceGraph:
-			if face.getY() != rowCount:
-				intG.append(row)
-				rowCount = face.getY()
-				row = list()
-			row.append(face.getX())
-		intG.append(row)
-
-		for row in intG:
-			for f in row:
-				s += str(f) + " "
-		return s
 
 	def assignUpperBounds(self):
 		whiteCount = [0] * len(self.rowCount)
@@ -407,14 +505,22 @@ class Graph(object):
 
 		self.totalUpperBounds = sum(self.rowCount)
 
-
 	def doubleBondsToString(self):
 		for key, value in self.getDoubleBonds().items():
 			print key.getX(), key.getY(), ":", value.getX(), value.getY()
 
-	def unvisitedCount(self):
-		unvisited = 0
-		for v in self.vertexGraph:
-			if v.visited == False:
-				unvisited += 1
-		return unvisited
+	def __cmp__(self, other):
+		if self.comparison == 'clars':
+			if self.getClarsNumber() < other.getClarsNumber():
+				return -1
+			elif self.getClarsNumber == other.getClarsNumber():
+				return 0
+			else:
+				return 1
+		elif self.comparison == 'fries':
+			if self.getFriesNumber() < other.getFriesNumber():
+				return -1
+			elif self.getFriesNumber == other.getFriesNumber():
+				return 0
+			else:
+				return 1
