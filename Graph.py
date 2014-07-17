@@ -456,6 +456,7 @@ class Graph(object):
 		mainloop()
 
 	def toString(self):
+		self.printUpperBounds()
 		string = '' 
 		string = "Fries Number: " + str(self.getFriesNumber()) + " Clars Number: " + str(self.getClarsNumber()) + '\n'
 		string += "Clars-Fries Differential: " + str(self.getClarsFriesDiff()) + '\n'

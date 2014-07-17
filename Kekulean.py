@@ -837,12 +837,8 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 			print "There are", len(graphs), "PM's"			
 
 			#must be 'fries' or 'clars'
-			#add that to a static feild
-			#graphs = merge_sort(graphs)
 			graphs.sort()
 			graphs.reverse()
-
-			graphs[0].printUpperBounds()
 
 			#save graphs as PNG file
 			savePNG(graphs, "graphs - Fries.png")
@@ -852,8 +848,24 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 			graphs.reverse()
 
 			savePNG(graphs, "graphs - Clars.png")
+ 
+			while True:
+				choice = raw_input("Would you like to view the graphs ranked by Fries or Clars? (or quit?) ")
+				while choice.lower() != 'fries' and choice.lower() != 'clars' and choice.lower() != 'quit':
+					choice = raw_input("Would you like to view the graphs ranked by Fries or Clars? (or quit?) ")
+				if choice.lower() == 'clars':
+					Graph.comparison = 'clars'
 
-			displayGraphs(graphs)
+				elif choice.lower() == 'fries':
+					Graph.comparison = 'fries'
+
+				else:
+					break
+					
+				graphs.sort()
+				graphs.reverse()
+				
+				displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
 			graphs = assignMatching(rootGraph)
@@ -932,9 +944,26 @@ def createRandomKekulean():
 		graphs.sort()
 
 		savePNG(graphs, "graphs - Clars.png")
+
+		while True:
+			choice = raw_input("Would you like to view the graphs ranked by Fries or Clars? (or quit?) ")
+			while choice.lower() != 'fries' and choice.lower() != 'clars' and choice.lower() != 'quit':
+				choice = raw_input("Would you like to view the graphs ranked by Fries or Clars? (or quit?) ")
+			if choice.lower() == 'clars':
+				Graph.comparison = 'clars'
+
+			elif choice.lower() == 'fries':
+				Graph.comparison = 'fries'
+
+			else:
+				break
+					
+			graphs.sort()
+			graphs.reverse()
+			
+			print "There are", len(graphs), "Kekulean structures"
+			displayGraphs(graphs)
 		
-		print "There are", len(graphs), "Kekulean structures"
-		displayGraphs(graphs)
 	else:
 		print "error - Graph is Kekulean but has no perfect matching - see error.txt for graph"
 		errorFile = open("error.txt", "w")
@@ -1235,11 +1264,11 @@ getSettings()
 
 selection = 0
 while True:
-	print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Don't click\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
+	print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
 	selection = int(raw_input("Selection: "))
 	while selection < 1 or selection > 8:
 		 print "\nInvalid response, please enter a proper selection."
-		 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Don't Click\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
+		 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
 		 selection = int(raw_input("Selection: "))
 
 	if selection == 1:
@@ -1251,7 +1280,8 @@ while True:
 	elif selection == 4:
 		createManyKekuleans()
 	elif selection == 5:
-		randomIntoFilesThreaded()
+		getSettings()
+		print 'Settings refreshed!'
 	elif selection == 6:
 		testKekuleanThms()
 	elif selection == 7:
