@@ -405,10 +405,10 @@ class Graph(object):
 
 		#print 'x:', x, 'y:', y
 
-		rightX = 20 * -(x - y)
+		rightX = 20 * (x + y)
 		#print 'rightX', rightX 
 
-		return 2 * (abs(leftX) + abs(rightX)) 
+		return int(1.5 * (abs(leftX) + abs(rightX)))
 
 	def displayGraph(self):
 		root = Tk()

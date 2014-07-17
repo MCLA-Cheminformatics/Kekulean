@@ -9,7 +9,10 @@ from VertexList import *
 from ConjectureData import *
 from PIL import Image, ImageDraw
 import math
+from xml.dom import minidom
 #from VerticalEdgeIterator import *
+
+settings = {}
 
 #function that reads in the graph returns a 2D string list of the graph
 def getInput(fileName):
@@ -32,6 +35,20 @@ def getInput(fileName):
 	inputFile.close()
 		
 	return faceGraph
+
+def getSettings():
+	settingsFile = open('settings.txt', 'r')
+	
+	line = settingsFile.readline()
+	while len(line) > 0:
+		line = line.replace('\n', '')
+		line = line.split(":")		
+		
+		settings[line[0]] = float(line[1])
+
+		line = settingsFile.readline()
+
+	settingsFile.close()
 
 def faceGraphToInts(faceGraph):
 	rowCount = 0
@@ -791,6 +808,9 @@ def savePNG(graphs, fileName):
 				x2 += x*20 - y*10 + xoffset
 				y2 += y*30 + yoffset
 				draw.line((x1, y1, x2, y2), fill=red, width=2)
+
+				if graphNumber % 20 == 0:
+					draw.line((g.getWidth() * (int(math.floor(float(graphNumber) / 20))), 0, g.getWidth() * (int(math.floor(float(graphNumber) / 20))), height), fill=black, width=5)
 		graphNumber += 1
 
 	filename = fileName
@@ -820,6 +840,7 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 			#add that to a static feild
 			#graphs = merge_sort(graphs)
 			graphs.sort()
+			graphs.reverse()
 
 			graphs[0].printUpperBounds()
 
@@ -828,6 +849,7 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 
 			Graph.comparison = 'clars'
 			graphs.sort()
+			graphs.reverse()
 
 			savePNG(graphs, "graphs - Clars.png")
 
@@ -920,11 +942,11 @@ def createRandomKekulean():
 
 #Creates a random planar graph, which may not be connected			
 def createRandomGraph():
-	height = randint(3, 10)
+	height = randint(settings["MIN_HEIGHT"], settings["MAX_HEIGHT"])
 	
 	randGraph = []
 	for i in range(height):
-		rowLength = randint(3, 10)
+		rowLength = randint(settings["MIN_WIDTH"], settings["MAX_WIDTH"])
 		row = getRow(rowLength, i)
 		while len(row) == 0:
 			row = getRow(rowLength, i)
@@ -936,8 +958,8 @@ def createRandomGraph():
 def getRow(rl, rowNum):
 	r = []
 	for j in range(rl): 
-			chance = randint(0, 1)
-			if chance == 1:
+			chance = randint(0, 100)
+			if chance > settings['POROSITY'] * 100:
 				r.append(Face(j, rowNum))
 	return r
 
@@ -1209,6 +1231,7 @@ def findHighestClars(graphs):
 
 
 #The Main
+getSettings()
 
 selection = 0
 while True:
