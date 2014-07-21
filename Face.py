@@ -19,6 +19,8 @@ class Face(object):
 
 		self.neighbors = []
 
+		self.visited = False
+
 	def addVertex(self, location, vertex):
 		self.vertices[location] = vertex
 	def assignVertices(self, vertices):

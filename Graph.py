@@ -1,6 +1,7 @@
 from Face import *
 from Vertex import *
 from Tkinter import *
+import copy
 
 #add proper support for the R and W
 #add proper support for sorting
@@ -29,6 +30,8 @@ class Graph(object):
 		self.rightMostFace = None
 		self.rankFaces()
 
+		self.setList = []
+
 		self.assignUpperBounds()
 
 	def getVertexGraph(self):
@@ -54,9 +57,16 @@ class Graph(object):
 		return self.FriesNumber
 	def getClarsNumber(self):
 		return self.ClarsNumber
+	def _countClars(self):
+		for f in self.faceGraph:
+			if f.isClars == True:
+				self.ClarsNumber += 1
 
 	def getClarsFriesDiff(self):
 		return float(self.ClarsNumber)/float(self.FriesNumber)
+
+	def getSetList(self):
+		return self.setList
 
 	def assignFriesFaces(self):
 		for f in self.faceGraph:
@@ -132,43 +142,73 @@ class Graph(object):
 				pairs.append((0, 30, 10, 40))
 		return pairs
 
-	#assigns Clars Faces the independent Fries Faces. Boes not yet find the heighest possible Clars number
+	#assigns Clars Faces
 	def assignClarsFaces(self):
+
 		friesList = []
+		for f in self.faceGraph:
+			if f.isFries == True:
+				friesList.append(f)
 
-		for face in self.faceGraph:
-			if face.isFries == True:
-				friesList.append(face)
-				neighbors = self._checkNeighbors(face)
-				#1 impies that there are Fries nieghbors, but no Clars
-				if neighbors == 1:
-					face.isClars = True
-					self.ClarsNumber += 1
-				#0 implies that there are no Clars or Fries neighbors
-				elif neighbors == 0:
-					face.isClars = True
-					face.isIsolatedFries = True
-					self.ClarsNumber += 1
+		setList = self._makeSetList(friesList)
 
-		self._maxClars(friesList)
+		for s in setList:
+			self._initClars(s)
 
-	def _maxClars(self, friesList):
+		self._maxClars(setList)
+
+		self._countClars()
+
+	def _initClars(self, s):
+		fries = []
+		fries.append(s.pop())
+		s.add(fries[0])
+		queue = []
+
+		for f in fries:
+			queue.append(f)
+			for n in f.getNeighbors():
+				if n not in queue and n.isFries == True:
+					queue.append(n)
+					fries.append(n)
+
+		for f in queue:
+			for n in f.getNeighbors():
+				if n.isClars == True:
+					break
+			else:
+				f.isClars = True
+
+	def _makeSetList(self, friesList):
 		setList = []
 
-		for f in friesList:
-			s = set()
-			s.add(f)
-			friesList.remove(f)
+		fries = copy.copy(friesList)
+		for f in fries:
+			for s in setList:
+				if f in s:
+					for n in f.getNeighbors():
+						if n.isFries == True:
+							s.add(n)
+					break
+			else:
+				s = set()
+				s.add(f)
+				for n in f.getNeighbors():
+					if n.isFries == True:
+						s.add(n)
+				setList.append(s)
 
-			neighbors = f.getNeighbors()
-			#print 'max Clars:', len(neighbors)
-			for n in neighbors:
-				if n in friesList and n not in s:
-					neighbors.extend(n.getNeighbors())
-					s.add(n)
-					friesList.remove(n)
-			setList.append(s)
+		for i in setList:
+			for j in setList:
+				if i != j  and not i.isdisjoint(j):
+					i |= j
+					setList.remove(j)
 
+		self.setList = setList
+
+		return setList
+
+	def _maxClars(self, setList):
 		for s in setList:
 			if len(s) > 1:
 				oldClars, newClars = self._compareClarsFaces(s)
@@ -178,10 +218,8 @@ class Graph(object):
 					for f in s:
 						if f.isClars == True:
 							f.isClars = False
-							self.ClarsNumber -= 1
 						else:
 							f.isClars = True
-							self.ClarsNumber += 1
 
 	def _compareClarsFaces(self, flipped):
 		oldClars = 0
@@ -463,8 +501,8 @@ class Graph(object):
 		string += "There are " + str(len(self.vertexGraph)) + " vertices" + '\n'
 
 		string += "Number of Double Bonds: " + str(len(self.getDoubleBonds())) + '\n'
-		for v1, v2 in self.getDoubleBonds().items():
-			string += str(v1) + ':' + str(v2) + '\n'	
+		#for v1, v2 in self.getDoubleBonds().items():
+		#	string += str(v1) + ':' + str(v2) + '\n'	
 		return string
 
 	def printUpperBounds(self):
@@ -482,6 +520,30 @@ class Graph(object):
 				row = face.getY()  	
 			string += " " + str(face.getX()) + " "
 		return string
+
+	def expandedToString(self):
+		row = 0
+		string = "Number of sets:" + str(len(self.getSetList())) +'\n'
+		for face in self.faceGraph:
+			if face.getY() != row:
+				string += "\n"
+				row = face.getY()  
+			if face.isClars == True:
+				string += " " + str(face.getX()) + "/C "
+			elif face.isFries == True:
+				string += " " + str(face.getX()) + "/F "
+			else:
+				string += " " + str(face.getX()) + " "
+		return string +'\n'
+
+	def debugToString(self):
+		setList = self.getSetList()
+
+		print 'len:', len(setList)
+		for s in setList:
+			print "set:"
+			for f in s:
+				print '\t', f
 
 	def assignUpperBounds(self):
 		whiteCount = [0] * len(self.rowCount)
