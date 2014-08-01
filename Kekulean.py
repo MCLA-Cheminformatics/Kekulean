@@ -888,7 +888,7 @@ def randomIntoFiles():
 	t1 = time.time()
 
 	for i in range(trials):
-		faceGraph = createRandomGraph()
+		faceGraph = createRandomConnectedGraph()
 		vGraph = makeVertexGraph(faceGraph)
 		randGraph = Graph(faceGraph, vGraph)
 
@@ -982,6 +982,13 @@ def createRandomGraph():
 		randGraph.extend(row)
 	#print randGraph
 	return randGraph
+
+def createRandomConnectedGraph():
+	g = createRandomGraph()
+	while isConnected(faceGraphToInts(g)) == False:
+		g = createRandomGraph()
+
+	return g
 
 #generates a row for the the createRandomGraph method
 def getRow(rl, rowNum):
