@@ -1271,11 +1271,11 @@ getSettings()
 
 selection = 0
 while True:
-	print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
+	print "1) Read graph from graph.txt\n2) Analyze a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
 	selection = int(raw_input("Selection: "))
 	while selection < 1 or selection > 8:
 		 print "\nInvalid response, please enter a proper selection."
-		 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
+		 print "1) Read graph from graph.txt\n2) Analyze a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
 		 selection = int(raw_input("Selection: "))
 
 	if selection == 1:
