@@ -512,13 +512,18 @@ class Graph(object):
 		print "Total Upper Bounds:", self.totalUpperBounds 
 	
 	def simpleToString(self):
+		firstTime = True
 		row = 0
 		string = ""
 		for face in self.faceGraph:
 			if face.getY() != row:
-				string += "\n"
-				row = face.getY()  	
-			string += " " + str(face.getX()) + " "
+				string += "\n" + str(face.getX())
+				row = face.getY()
+			elif not firstTime: 	
+				string += ' ' + str(face.getX())
+			else:
+				string += str(face.getX())
+			firstTime = False
 		return string
 
 	def expandedToString(self):
