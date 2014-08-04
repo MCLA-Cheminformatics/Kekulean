@@ -16,3 +16,10 @@ class ConjectureData(object):
 		self.string = s
 	def __str__(self):
 		return self.string
+	def __cmp__(self, other):
+		if self.getNumVertices() < other.getNumVertices():
+			return -1
+		elif self.getNumVertices() == other.getNumVertices():
+			return 0
+		else:
+			return 1
