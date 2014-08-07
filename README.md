@@ -3,6 +3,7 @@ Kekulean
 Introduction
 
 What is this program?
+
 The task of finding Kekulean structures (or perfect matchings from a graph theory perspective) in benzenoid graphs (also known as benzene patches, hexagonal systems, to name a few) is an easy-to-understand process but can be very time and labor consuming even with small graphs. On top of this problem, chemical graph theorists are often interested in finding the number of Clars and Fries face of the graph which are indictors of the strength of the chemical compound that the graph represents. Finding all this information accurately can be time consuming and is hard or even impossible to generalize as details seem to be dependent on the structure of the graph.
 This program is capable of generating graphs, determining if it is Kekulean, find all possible perfect matchings, determine the Clars and Fries number of each structure and output the results to a PNG file for later review.
 
@@ -16,13 +17,18 @@ For most users, the Clars-Fries differential that is calculated may seem foreign
 Installation
 
 LINUX
+
 Python
+
 The program is designed to run using Python 2 and is not tested for Python 3. It is recommended that you use at least Python 2.6 in order to support the to-be-implemented multiprocessing module. Python should be installed by default on Linux machines but you can update your version of Python by downloading from https://www.python.org/download/.  You can also use: sudo apt-get install python to update to the latest version, if you are on an Ubuntu/Ubuntu-based system.
 You can check if you Python installed and what version by typing python into the terminal. This will bring you into python’s interactive mode. You exit interactive mode by pressing Ctrl+D.
+
 Pillow
+
 Fedora, Debian/Ubuntu, and ArchLinux all come with Pillow installed in place of the Python Imaging Library (PIL).  Debian/Ubuntu systems can install Pillow using the terminal command: sudo apt-get install python-dev python-setuptools 
 
 MAC OSX
+
 Python
 
 The program is designed to run using Python 2 and is not tested for Python 3. It is recommended that you use at least Python 2.6 in order to support the to-be-implemented multiprocessing module. Python should be installed by default on Mac OSX machines but you can update your version of Python by downloading from https://www.python.org/download/.  
@@ -35,6 +41,7 @@ Pillow
 You can download the source from https://pypi.python.org/pypi/Pillow, extract it, and run python setup.py install from the terminal while in the same directory as the extracted files. If you have pip installed you can run pip install Pillow in the terminal. If you do not have pip you can use easy_install Pillow in the terminal to install Pillow
 
 Windows
+
 Python
 
 You can download a Windows installer from the https://www.python.org/download/ website. There are installers for both 32-bit and 64-bit processors. If you do not know what version you have (most likely you have 32-bit, especially on older machines), you should download the regular installer (the one that is not labeled as the X86-64 installer (This is the 64-bit processor one)).  If you encounter errors now or later, you may have installed the wrong version and should retry with to the other installer.  You can check to see if python installed, or is installed, by searching your computer for a program called IDLE. This a Python IDE that is packaged with Python and can be used to write and run Python programs.
