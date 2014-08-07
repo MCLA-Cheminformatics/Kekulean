@@ -9,8 +9,8 @@ This program is capable of generating graphs, determining if it is Kekulean, fin
 
 Technical Details of the program
 
-The program is written in Python and is entirely open-source to better help others in field quickly test graphs and find properties of them without the time-consuming effort that is involved in manually replicating the process.  This program is run using Python 2. It is recommended that you use at least version 2.6 as that module supports multiprocessing and is a planned feature of this program. 
-To run the program, run ‘Kekulean.py’
+The program is written in Python and is entirely open-source to better help others in field quickly test graphs and find properties of them without the time-consuming effort that is involved in manually replicating the process.  This program is run using Python 2. YOu must have at least version 2.6 as that verison introduced multiprocessing
+To run the program, run ‘Kekulean.py’by double-clicking it or via the terminal/command line
 There is one outside dependency that is not included with the .zip of the program. The Pillow library provides the functionally to create PNG of the results of the programs. Pillow is needed in order for the program to run.
 For most users, the Clars-Fries differential that is calculated may seem foreign as it is a property that a research colleague invented and was interested in.  This is no reason to pay any attention to it.
 
@@ -20,7 +20,7 @@ LINUX
 
 Python
 
-The program is designed to run using Python 2 and is not tested for Python 3. It is recommended that you use at least Python 2.6 in order to support the to-be-implemented multiprocessing module. Python should be installed by default on Linux machines but you can update your version of Python by downloading from https://www.python.org/download/.  You can also use: sudo apt-get install python to update to the latest version, if you are on an Ubuntu/Ubuntu-based system.
+The program is designed to run using Python 2 and is not tested for Python 3. Python should be installed by default on Linux machines but you can update your version of Python by downloading from https://www.python.org/download/.  You can also use: sudo apt-get install python to update to the latest version, if you are on an Ubuntu/Ubuntu-based system.
 You can check if you Python installed and what version by typing python into the terminal. This will bring you into python’s interactive mode. You exit interactive mode by pressing Ctrl+D.
 
 Pillow
@@ -31,7 +31,7 @@ MAC OSX
 
 Python
 
-The program is designed to run using Python 2 and is not tested for Python 3. It is recommended that you use at least Python 2.6 in order to support the to-be-implemented multiprocessing module. Python should be installed by default on Mac OSX machines but you can update your version of Python by downloading from https://www.python.org/download/.  
+The program is designed to run using Python 2 and is not tested for Python 3. Python should be installed by default on Mac OSX machines but you can update your version of Python by downloading from https://www.python.org/download/.  
 
 You can check if you Python installed and what version by typing python into the terminal. This will bring you into python’s interactive mode. You exit interactive mode by pressing Ctrl+D.
 
@@ -54,6 +54,7 @@ Run the .exe file and follow the on screen instructions.
 How to use this program
 
 The program allows the user to analyze benzenoid graphs and determine properties such as whether a graph is Kekulean, the number of Kekulean structures, and the Clars and Fries numbers of the graph.  Input and textual output are given using a coordinate based on the faces of the graph and will be explained later on in this section. 
+
 Analyze graph from text file
 The first option in the program is to read a graph from ‘graph.txt’ and determine properties of said graph. It will tell you the graph is Kekulean, the number of Kekulean structures, and the Clars and Fries numbers. It will ask the user how they want the structures organized and display user-specified graphs. It also outputs all the structures to two PNG files, each one ranked according to Clars numbers or Fries numbers. Please note that the outputted PNGs will overwrite older ones so you should back up any files you want to save.  
 
