@@ -790,6 +790,7 @@ def savePNG(graphs, fileName):
 	red = (255, 0 ,0)
 	green = (0, 255, 0)
 	blue = (0, 0, 255)
+	purple = (126, 0, 128);
 
 	graphNumber = 0
 
@@ -816,12 +817,16 @@ def savePNG(graphs, fileName):
 
 			for pair in pairs:
 				#paint pair
-				x1, y1, x2, y2 = pair
+				x1, y1, x2, y2, required = pair
 				x1 += x*20 - y*10 + xoffset
 				y1 += y*30 + yoffset
 				x2 += x*20 - y*10 + xoffset
 				y2 += y*30 + yoffset
-				draw.line((x1, y1, x2, y2), fill=red, width=2)
+				if required == True:
+					lineColor = purple
+				else:
+					lineColor = red
+				draw.line((x1, y1, x2, y2), fill=lineColor, width=2)
 
 				if graphNumber % 20 == 0:
 					draw.line((g.getWidth() * (int(math.floor(float(graphNumber) / 20))), 0, g.getWidth() * (int(math.floor(float(graphNumber) / 20))), height), fill=black, width=5)
@@ -853,6 +858,8 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 			#must be 'fries' or 'clars'
 			graphs.sort()
 			graphs.reverse()
+			
+			_findRequiredEdges(graphs)
 
 			#save graphs as PNG file
 			savePNG(graphs, "graphs - Fries.png")
@@ -1286,6 +1293,11 @@ def _findRequiredEdges(graphs):
 			masterSet = masterSet & edgeSet
 		graphNumber += 1
 	if len(masterSet) > 0:
+		for edge in masterSet:
+			#print edge
+			v1, v2 = edge
+			v1.required = True
+			v2.required = True
 		return True
 	else:
 		return False
