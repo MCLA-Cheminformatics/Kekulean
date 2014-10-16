@@ -9,7 +9,7 @@ from VertexList import *
 from ConjectureData import *
 from PIL import Image, ImageDraw
 import math
-from xml.dom import minidom
+import multiprocessing as mp
 #from VerticalEdgeIterator import *
 
 settings = {}
@@ -669,7 +669,6 @@ def assignBonds(graph, v1, v2, matching=None, visitedVerts=None):
 
 						matchingsList.extend(assignBonds(graph, vertex, n, newMatching, newVisited))
 
-
 		if added is not None:
 			for n in added.getNeighbors().values():
 				if n not in visited:
@@ -722,32 +721,47 @@ def assignMatching(rootGraph):
 	m2 = assignBonds(rootGraph, v3, v4)
 	matchings.extend(m2)
 
-	#matchingSet = removeDuplicates(matchings)
 
-	matched = []
+	graphs = []
 	for m in matchings:
-		matched.append(m.getMatching())
-
-	ret = []
-	for m in matched:
-		#g = Graph(rootGraph.getFaceGraph(), rootGraph.getVertexGraph())
 		g = copy.copy(rootGraph)
 		g.faceGraph = createNewFaceGraph(rootGraph.getFaceGraph())
+
+		#srg = set(rootGraph.getVertexGraph())
+		#sg = set(g.getVertexGraph())
+		#print 'test:', len(srg & sg) 
+
 		g._assignFaceNeighbors()
-		g.setDoubleBonds(m)
-		ret.append(g)
+		g.setDoubleBonds(m.getMatching())
+		#g.update(m.getMatching())
+		
+		graphs.append(g)
 
-	ret = assignFriesAndClars(ret)
+	#multiprocessing
+	#pool = mp.Pool(mp.cpu_count())
 
-	return ret
+	#r = [pool.map(assignFriesAndClars, graphs)]
+	#results = [item for sublist in r for item in sublist]
+	
+	#non-multiprocessing
+	results = assignFriesAndClars(graphs)
+
+	#ret = assignFriesAndClars(ret)
+
+	return results
 
 def assignFriesAndClars(graphs):
-	for g in graphs:
-		g.assignFriesFaces()
-		g.assignClarsFaces()
-	return graphs
+	try: 
+		for g in graphs:
+			g.assignFriesFaces()
+			g.assignClarsFaces()
+		return graphs
+	except:
+		graphs.assignFriesFaces()
+		graphs.assignClarsFaces()
+		return graphs 
 
-def displayGraphs(graphs):
+"""def displayGraphs(graphs):
 	if len(graphs) > 0:
 		index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))
 		while index >= 0:
@@ -759,7 +773,7 @@ def displayGraphs(graphs):
 			
 			graph.displayGraph()
 			print "There are", len(graphs), "Kekule structures"
-			index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))
+			index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))"""
 
 def savePNG(graphs, fileName):
 	#set up PIL stuff 
@@ -865,11 +879,11 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 				graphs.sort()
 				graphs.reverse()
 				
-				displayGraphs(graphs)
+				#displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
-			graphs = assignMatching(rootGraph)
-			print "Trying anyway, there are", len(graphs), "PM's"
+			#graphs = assignMatching(rootGraph)
+			#print "Trying anyway, there are", len(graphs), "PM's"
 			#displayGraphs(graphs)
 	else:
 		print "Graph is not connected"
@@ -912,26 +926,14 @@ def randomIntoFiles():
 	kekuleanFile.close()
 	notKekuleanFile.close()
 
-#creates a random Kekulean graph		
+#creates a random Kekulean graph ands does stuff with it and saves it to an png		
 def createRandomKekulean():
 	#creates a face graphs
 	randomFaces = createRandomGraph()
 
-	while isConnected(faceGraphToInts(randomFaces)) == False:
-		randomFaces = createRandomGraph()
+	randomGraph = _createRandomKekulean()
 
-	vertexGraph = makeVertexGraph(randomFaces)
-	randomGraph = Graph(randomFaces, vertexGraph)
-
-	while isKekulean(randomGraph) == False:
-		randomFaces = createRandomGraph()
-		while isConnected(faceGraphToInts(randomFaces)) == False:
-			randomFaces = createRandomGraph()
-
-		vertexGraph = makeVertexGraph(randomFaces)
-		randomGraph = Graph(randomFaces, vertexGraph)
-
-	print "There are", len(vertexGraph), "vertices"
+	print "There are", len(randomGraph.getVertexGraph()), "vertices"
 
 	graphs = assignMatching(randomGraph)
 	graphs.sort()
@@ -1009,34 +1011,34 @@ def getRow(rl, rowNum):
 					del matchings[matchings.index(j)]
 	return matchings"""
 
-def createManyKekuleans():
-	graphs = [] #list of kekulean graphs 
-	graphList = [] #list of the Kekulean graphs with their matchings, and Fries/Clars Faces 
-	trials = int(raw_input("How many graphs would you like to create? "))
+def _createRandomKekulean():
+	#creates a face graphs
+	randomFaces = createRandomGraph()
 
-	for i in range(trials):
-		#creates a face graphs
+	while isConnected(faceGraphToInts(randomFaces)) == False:
 		randomFaces = createRandomGraph()
 
+	vertexGraph = makeVertexGraph(randomFaces)
+	randomGraph = Graph(randomFaces, vertexGraph)
+
+	while isKekulean(randomGraph) == False:
+		#print "making K"
+		randomFaces = createRandomGraph()
 		while isConnected(faceGraphToInts(randomFaces)) == False:
 			randomFaces = createRandomGraph()
 
 		vertexGraph = makeVertexGraph(randomFaces)
 		randomGraph = Graph(randomFaces, vertexGraph)
+	return randomGraph
 
-		while isKekulean(randomGraph) == False:
-			#print "making K"
-			randomFaces = createRandomGraph()
-			while isConnected(faceGraphToInts(randomFaces)) == False:
-				randomFaces = createRandomGraph()
+def createManyKekuleans():
+	graphs = [] #list of kekulean graphs 
+	graphList = [] #list of the Kekulean graphs with their matchings, and Fries/Clars Faces 
+	trials = int(raw_input("How many graphs would you like to create? "))
 
-			vertexGraph = makeVertexGraph(randomFaces)
-			randomGraph = Graph(randomFaces, vertexGraph)
-
-		print "There are", len(vertexGraph), "vertices"
-
-		graphs.append(randomGraph)
-
+	pool = mp.Pool(mp.cpu_count())
+	results = [pool.apply_async(_createRandomKekulean) for x in range(trials)]
+	graphs = [r.get() for r in results]
 
 	for g in graphs:
 		graphList.extend(assignMatching(g))
@@ -1197,11 +1199,15 @@ def getUpperBounds(graph):
 	else:
 		print "The graph is not Kekulean"
 
-def testConjecture():
+def testConjecture(hours=0):
 	graphList = []
-	conflict = False
+	results = open("results.txt", "w")
+	results.write("The program actually run!")
 
-	interval = float(raw_input("How many hours would you like to run the program? "))
+	if hours == 0:
+		interval = float(raw_input("How many hours would you like to run the program? "))
+	else:
+		interval = hours
 
 	timeLimit = 3600 * interval
 	print "limit:", timeLimit
@@ -1210,7 +1216,7 @@ def testConjecture():
 	t2 = time.time()
 
 	counter = 0
-	while t2 - t1 < timeLimit and conflict == False:
+	while t2 - t1 < timeLimit:
 		print "graph #" + str(counter)
 
 		#creates a face graphs
@@ -1236,22 +1242,23 @@ def testConjecture():
 			h = ConjectureData(len(structures[0].getVertexGraph()), structures[-1].getClarsNumber(), len(structures)) 
 			h.setString(structures[0].simpleToString())
 
-
 			for g in graphList:
 				if h.getNumVertices() == g.getNumVertices():
-					if h.getNumStructures() <= g.getNumStructures():
+					if h.getNumStructures() < g.getNumStructures():
 						if h.getClarsNumber() > g.getClarsNumber():
 							print 'Conjecture is false:'
-							print 'graph H: Clars:', h.getClarsNumber(), "Number of Structures:", h.getNumStructures() 
-							print h
-							print '\ngraph G: Clars:', g.getClarsNumber(), "Number of Structures:", g.getNumStructures()
-							print g
-							conflict = True
-							break
-						else:
-							print 'Conjecture holds true'
+							results.write('\ngraph H: Clars: ' + str(h.getClarsNumber()) + " Number of Structures: " + str(h.getNumStructures()) + " Number of vertices: " + str(h.getNumVertices()) + "\n") 
+							results.write(str(h))
+							results.write('\ngraph G: Clars: ' + str(g.getClarsNumber()) + " Number of Structures: " + str(g.getNumStructures()) + " Number of vertices: " + str(g.getNumVertices()) + "\n") 
+							results.write(str(g))
+							results.write("\n\n")
+							#conflict = True
+							#break
+						#else:
+							#print 'Conjecture holds true'
 
-			graphList.append(h)
+		#only adds graphs to list if it under some number of vertices
+		graphList.append(h)
 
 
 
@@ -1264,34 +1271,93 @@ def findHighestClars(graphs):
 		if g.getClarsNumber() > clars:
 			clars = g.getClarsNumber()
 	return clars
+	
+def _findRequiredEdges(graphs):
+	masterSet = set()
+	graphNumber = 0
+	for g in graphs:
+		edgeSet = set()
+		for k, v in g.getDoubleBonds().items():
+			edge = (k, v)
+			edgeSet.add(edge)
+		if len(masterSet) == 0 and graphNumber == 0:
+			masterSet.update(edgeSet)
+		else:
+			masterSet = masterSet & edgeSet
+		graphNumber += 1
+	if len(masterSet) > 0:
+		return True
+	else:
+		return False
+	
+def findRequiredEdges(hours=0):
+	edgeFile = open("RequiredEdges.txt", "w")
+	graphNumber = 0
 
+	flag = False
+	if hours == 0:
+		interval = float(raw_input("How many hours would you like to run the program? "))
+	else:
+		interval = hours
+
+	timeLimit = 3600 * interval
+	print "limit:", timeLimit
+
+	t1 = time.time()
+	t2 = time.time()
+
+	while t2 - t1 < timeLimit:
+		print "graph", graphNumber
+
+		flag = False
+
+		graph = _createRandomKekulean()
+		graphs = assignMatching(graph)
+		
+		flag = _findRequiredEdges(graphs)
+		if flag == True:
+			print "Found graph with required edges"
+			edgeFile.write(graph.simpleToString())
+			edgeFile.write("\n\n")
+		graphNumber += 1
 
 #The Main
 getSettings()
 
 selection = 0
-while True:
-	print "1) Read graph from graph.txt\n2) Analyze a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
-	selection = int(raw_input("Selection: "))
-	while selection < 1 or selection > 8:
-		 print "\nInvalid response, please enter a proper selection."
-		 print "1) Read graph from graph.txt\n2) Analyze a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Quit"
-		 selection = int(raw_input("Selection: "))
 
-	if selection == 1:
-		analyzeGraphFromFile()
-	elif selection == 2:
-		createRandomKekulean()
-	elif selection == 3:
-		randomIntoFiles()
-	elif selection == 4:
-		createManyKekuleans()
-	elif selection == 5:
-		getSettings()
-		print 'Settings refreshed!'
-	elif selection == 6:
-		testKekuleanThms()
-	elif selection == 7:
-		testConjecture()
-	else:
-		sys.exit()
+#print "Len of args:", len(sys.argv)
+#print sys.argv
+if len(sys.argv) == 2:
+	print "in if"
+	testConjecture(float(sys.argv[-1]))
+	
+else:
+	while True:
+		print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Find graphs with required edges\n9) Quit"
+		selection = int(raw_input("Selection: "))
+		while selection < 1 or selection > 9:
+			 print "\nInvalid response, please enter a proper selection."
+			 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Find graphs with required edges\n9) Quit"
+			 selection = int(raw_input("Selection: "))
+
+		if selection == 1:
+			analyzeGraphFromFile()
+		elif selection == 2:
+			createRandomKekulean()
+		elif selection == 3:
+			randomIntoFiles()
+		elif selection == 4:
+			createManyKekuleans()
+		elif selection == 5:
+			getSettings()
+			print 'Settings refreshed!'
+		elif selection == 6:
+			testKekuleanThms()
+		elif selection == 7:
+			testConjecture()
+		elif selection == 8:
+			findRequiredEdges()
+		else:
+			sys.exit()
+

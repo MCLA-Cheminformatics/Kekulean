@@ -1,6 +1,7 @@
 from Face import *
 from Vertex import *
-from Tkinter import *
+#from Tkinter import *
+import sys
 import copy
 
 #add proper support for the R and W
@@ -36,6 +37,8 @@ class Graph(object):
 
 	def getVertexGraph(self):
 		return self.vertexGraph
+	def setVertexGraph(self, vertexGraph):
+		self.vertexGraph = vertexGraph
 	def getFaceGraph(self):
 		return self.faceGraph
 	def getNumberOfRows(self):
@@ -99,6 +102,7 @@ class Graph(object):
 				bondCount += 1
 		if bondCount == 3:
 			face.isFries = True
+			#print 'assigning'
 		#print bondCount
 
 	#method is used to get the pixel locations of the double bonds in the graph. Used for displayGrpah method
@@ -107,39 +111,39 @@ class Graph(object):
 		pairs = []
 		if verts[Face.TOP_LEFT] in self.doubleBonds:
 			if self.doubleBonds[verts[Face.TOP_LEFT]] == verts[Face.TOP]:
-				pairs.append((0, 10, 10, 0))
+				pairs.append((0, 10, 10, 0, verts[Face.TOP_LEFT].required))
 			elif self.doubleBonds[verts[Face.TOP_LEFT]] == verts[Face.BOTTOM_LEFT]:
-				pairs.append((0, 10, 0, 30))
+				pairs.append((0, 10, 0, 30, verts[Face.TOP_LEFT].required))
 
 		if verts[Face.TOP] in self.doubleBonds:
 			if self.doubleBonds[verts[Face.TOP]] == verts[Face.TOP_LEFT]:
-				pairs.append((10, 0, 0, 10))
+				pairs.append((10, 0, 0, 10, verts[Face.TOP].required))
 			elif self.doubleBonds[verts[Face.TOP]] == verts[Face.TOP_RIGHT]:
-				pairs.append((10, 0, 20, 10))
+				pairs.append((10, 0, 20, 10, verts[Face.TOP].required))
 
 		if verts[Face.TOP_RIGHT] in self.doubleBonds:
 			if self.doubleBonds[verts[Face.TOP_RIGHT]] == verts[Face.TOP]:
-				pairs.append((20, 10, 10, 0))
+				pairs.append((20, 10, 10, 0, verts[Face.TOP_RIGHT].required))
 			elif self.doubleBonds[verts[Face.TOP_RIGHT]] == verts[Face.BOTTOM_RIGHT]:
-				pairs.append((20, 10, 20, 30))
+				pairs.append((20, 10, 20, 30, verts[Face.TOP_RIGHT].required))
 
 		if verts[Face.BOTTOM_RIGHT] in self.doubleBonds:
 			if self.doubleBonds[verts[Face.BOTTOM_RIGHT]] == verts[Face.BOTTOM]:
-				pairs.append((20, 30, 10, 40))
+				pairs.append((20, 30, 10, 40, verts[Face.BOTTOM_RIGHT].required))
 			elif self.doubleBonds[verts[Face.BOTTOM_RIGHT]] == verts[Face.TOP_RIGHT]:
-				pairs.append((20, 30, 20, 10))
+				pairs.append((20, 30, 20, 10, verts[Face.BOTTOM_RIGHT].required))
 
 		if verts[Face.BOTTOM] in self.doubleBonds:
 			if self.doubleBonds[verts[Face.BOTTOM]] == verts[Face.BOTTOM_RIGHT]:
-				pairs.append((10, 40, 20, 30))
+				pairs.append((10, 40, 20, 30, verts[Face.BOTTOM].required))
 			elif self.doubleBonds[verts[Face.BOTTOM]] == verts[Face.BOTTOM_LEFT]:
-				pairs.append((10, 40, 0, 30))
+				pairs.append((10, 40, 0, 30, verts[Face.BOTTOM].required))
 
 		if verts[Face.BOTTOM_LEFT] in self.doubleBonds:
 			if self.doubleBonds[verts[Face.BOTTOM_LEFT]] == verts[Face.TOP_LEFT]:
-				pairs.append((0, 30, 0, 10))
+				pairs.append((0, 30, 0, 10, verts[Face.BOTTOM_LEFT].required))
 			elif self.doubleBonds[verts[Face.BOTTOM_LEFT]] == verts[Face.BOTTOM]:
-				pairs.append((0, 30, 10, 40))
+				pairs.append((0, 30, 10, 40, verts[Face.BOTTOM_LEFT].required))
 		return pairs
 
 	#assigns Clars Faces
@@ -301,6 +305,21 @@ class Graph(object):
 			#print n 
 			face.setNeighbors(n)
 
+	def update(self, matching):
+		sdb = set(self.doubleBonds)
+		sv = set(self.vertexGraph)
+		print 'before changing isdisjoint:', sdb.isdisjoint(sv) 
+
+		self.doubleBonds.clear()
+		for key, value in matching.items():
+			v1 = self.findVertex(key.getX(), key.getY())
+			v2 = self.findVertex(value.getX(), value.getY())
+			self.doubleBonds[v1] = v2
+
+		sdb = set(self.doubleBonds)
+		sv = set(self.vertexGraph)
+		print 'changing isdisjoint:', sdb.isdisjoint(sv) 
+
 	#returns the face with the x- and y-coor given
 	def findFace(self, x, y):
 		if x < 0 or y < 0:
@@ -312,6 +331,17 @@ class Graph(object):
 					face = f
 					break
 			return face
+
+	def findVertex(self, x, y):
+		if x < 0 or y < 0:
+			return None
+		else:
+			vertex = None
+			for v in self.vertexGraph:
+				if v.getX() == x and v.getY() == y:
+					vertex = v
+					break
+			return vertex
 
 	#checks if the graph structure is kekulean or not, knowning that the root graph is Kekulean
 	def checkKekulean(self):
@@ -448,7 +478,7 @@ class Graph(object):
 
 		return int(1.5 * (abs(leftX) + abs(rightX)))
 
-	def displayGraph(self):
+	"""def displayGraph(self):
 		root = Tk()
 
 		xScrollbar = Scrollbar(root, orient=HORIZONTAL)
@@ -491,7 +521,7 @@ class Graph(object):
 				y2 += y*30
 				canvas.create_line(x1, y1, x2, y2, fill='red', width=3)
 
-		mainloop()
+		mainloop()"""
 
 	def toString(self):
 		self.printUpperBounds()

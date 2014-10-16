@@ -15,6 +15,7 @@ class Vertex(object):
 		self.w = False
 		self.wx = 0
 		self.wy = 0
+		self.required = False
 
 	def addNeighbor(self, location, vertex):
 		self.neighbors[location] = vertex
