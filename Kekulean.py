@@ -778,8 +778,12 @@ def assignFriesAndClars(graphs):
 def savePNG(graphs, fileName):
 	#set up PIL stuff 
 	width = graphs[0].getWidth() * int(math.ceil(float(len(graphs))/20))
-	#(len(graphs)+1)
-	height = 20 * graphs[0].getNumberOfRows() * 40
+	#calculate PNG height
+	if len(graphs) > 20:
+		heightModifier = len(graphs)
+	else:
+		heightModifier = 20
+	height = heightModifier * graphs[0].getNumberOfRows() * 40
 
 	image = Image.new("RGB", (width, height), (255,255,255))
 	draw = ImageDraw.Draw(image)
@@ -790,7 +794,7 @@ def savePNG(graphs, fileName):
 	red = (255, 0 ,0)
 	green = (0, 255, 0)
 	blue = (0, 0, 255)
-	purple = (126, 0, 128);
+	purple = (128, 0, 128);
 
 	graphNumber = 0
 
@@ -834,6 +838,65 @@ def savePNG(graphs, fileName):
 
 	filename = fileName
 	image.save(filename)
+
+def saveSinglePNG(graph):
+	#set up PIL stuff
+	#Calculate pNG width 
+	width = graph.getWidth() * int(math.ceil(float(len(graphs))/20))
+	#calculate PNG height
+	height = graph.getNumberOfRows() * 40
+
+	image = Image.new("RGB", (width, height), (255,255,255))
+	draw = ImageDraw.Draw(image)
+
+	#colors
+	gray = (211, 211, 211)
+	black = (0, 0, 0)
+	red = (255, 0 ,0)
+	green = (0, 255, 0)
+	blue = (0, 0, 255)
+	purple = (128, 0, 128);
+
+	for f in g.getFaceGraph():
+		x = f.getX() 
+		y = f.getY()
+		faceColor = gray
+		#assign colors for faces
+		if f.isClars == True:
+			faceColor = blue
+		elif f.isFries == True:
+			faceColor = green
+
+		xoffset = g.getXOffset() + g.getWidth() * (int(math.floor(float(graphNumber) / 20)))
+		yoffset = graphNumber % 20 * g.getNumberOfRows() * 40 + 15
+			
+		points = [0 + x*20 - y*10 + xoffset, 10 + y*30 +yoffset, 10 + x*20 - y*10 + xoffset, 0 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 10 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset, 10 + x*20 - y*10 + xoffset, 40 + y*30 + yoffset, 0 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset]
+
+		#draw hexagons
+		draw.polygon(points, outline=black, fill=faceColor)
+
+		pairs = g.getBondedVertices(f)
+
+		for pair in pairs:
+			x1, y1, x2, y2, required = pair
+			x1 += x*20 - y*10 + xoffset
+			y1 += y*30 + yoffset
+			x2 += x*20 - y*10 + xoffset
+			y2 += y*30 + yoffset
+			if required == True:
+				lineColor = purple
+			else:
+				lineColor = red
+			draw.line((x1, y1, x2, y2), fill=lineColor, width=2)
+
+			if graphNumber % 20 == 0:
+				draw.line((g.getWidth() * (int(math.floor(float(graphNumber) / 20))), 0, g.getWidth() * (int(math.floor(float(graphNumber) / 20))), height), fill=black, width=5)
+	graphNumber += 1
+
+	#filename = fileName
+	fileName = "Required.png"
+	image.save(filename)
+
 
 def analyzeGraphFromFile(fileName="graph.txt"):
 	faceGraph = getInput(fileName)
