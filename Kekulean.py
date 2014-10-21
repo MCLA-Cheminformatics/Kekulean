@@ -10,7 +10,7 @@ from ConjectureData import *
 from PIL import Image, ImageDraw
 import math
 import multiprocessing as mp
-#from VerticalEdgeIterator import *
+import os
 
 settings = {}
 
@@ -839,10 +839,10 @@ def savePNG(graphs, fileName):
 	filename = fileName
 	image.save(filename)
 
-def saveSinglePNG(graph):
+def saveSinglePNG(graph, fileName):
 	#set up PIL stuff
-	#Calculate pNG width 
-	width = graph.getWidth() * int(math.ceil(float(len(graphs))/20))
+	#Calculate PNG width 
+	width = graph.getWidth()
 	#calculate PNG height
 	height = graph.getNumberOfRows() * 40
 
@@ -857,7 +857,7 @@ def saveSinglePNG(graph):
 	blue = (0, 0, 255)
 	purple = (128, 0, 128);
 
-	for f in g.getFaceGraph():
+	for f in graph.getFaceGraph():
 		x = f.getX() 
 		y = f.getY()
 		faceColor = gray
@@ -867,15 +867,15 @@ def saveSinglePNG(graph):
 		elif f.isFries == True:
 			faceColor = green
 
-		xoffset = g.getXOffset() + g.getWidth() * (int(math.floor(float(graphNumber) / 20)))
-		yoffset = graphNumber % 20 * g.getNumberOfRows() * 40 + 15
+		xoffset = graph.getXOffset() + graph.getWidth()
+		yoffset = graph.getNumberOfRows() * 40 + 15
 			
 		points = [0 + x*20 - y*10 + xoffset, 10 + y*30 +yoffset, 10 + x*20 - y*10 + xoffset, 0 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 10 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset, 10 + x*20 - y*10 + xoffset, 40 + y*30 + yoffset, 0 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset]
 
 		#draw hexagons
 		draw.polygon(points, outline=black, fill=faceColor)
 
-		pairs = g.getBondedVertices(f)
+		pairs = graph.getBondedVertices(f)
 
 		for pair in pairs:
 			x1, y1, x2, y2, required = pair
@@ -889,13 +889,7 @@ def saveSinglePNG(graph):
 				lineColor = red
 			draw.line((x1, y1, x2, y2), fill=lineColor, width=2)
 
-			if graphNumber % 20 == 0:
-				draw.line((g.getWidth() * (int(math.floor(float(graphNumber) / 20))), 0, g.getWidth() * (int(math.floor(float(graphNumber) / 20))), height), fill=black, width=5)
-	graphNumber += 1
-
-	#filename = fileName
-	fileName = "Required.png"
-	image.save(filename)
+	image.save(fileName)
 
 
 def analyzeGraphFromFile(fileName="graph.txt"):
@@ -1366,8 +1360,12 @@ def _findRequiredEdges(graphs):
 		return False
 	
 def findRequiredEdges(hours=0):
-	edgeFile = open("RequiredEdges.txt", "w")
+	if not os.path.exists("requiredEdges"):
+		os.mkdir("requiredEdges")
+
+	edgeFile = open("requiredEdges/RequiredEdges.txt", "w")
 	graphNumber = 0
+	rqNum = 0
 
 	flag = False
 	if hours == 0:
@@ -1394,7 +1392,14 @@ def findRequiredEdges(hours=0):
 			print "Found graph with required edges"
 			edgeFile.write(graph.simpleToString())
 			edgeFile.write("\n\n")
+
+			#save PNG's I hope
+			fileName = "requiredEdges/Graph" + str(rqNum) + ".png"
+			saveSinglePNG(graphs[0], fileName)
+			rqNum += 1
+
 		graphNumber += 1
+		t2 = time.time()
 
 #The Main
 getSettings()
