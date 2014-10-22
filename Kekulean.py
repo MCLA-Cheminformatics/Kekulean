@@ -867,8 +867,8 @@ def saveSinglePNG(graph, fileName):
 		elif f.isFries == True:
 			faceColor = green
 
-		xoffset = graph.getXOffset() + graph.getWidth()
-		yoffset = graph.getNumberOfRows() * 40 + 15
+		xoffset = graph.getXOffset()
+		yoffset = graph.getNumberOfRows()
 			
 		points = [0 + x*20 - y*10 + xoffset, 10 + y*30 +yoffset, 10 + x*20 - y*10 + xoffset, 0 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 10 + y*30 + yoffset, 20 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset, 10 + x*20 - y*10 + xoffset, 40 + y*30 + yoffset, 0 + x*20 - y*10 + xoffset, 30 + y*30 + yoffset]
 
