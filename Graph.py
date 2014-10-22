@@ -1,6 +1,6 @@
 from Face import *
 from Vertex import *
-#from Tkinter import *
+from Tkinter import *
 import sys
 import copy
 
@@ -148,7 +148,6 @@ class Graph(object):
 
 	#assigns Clars Faces
 	def assignClarsFaces(self):
-
 		friesList = []
 		for f in self.faceGraph:
 			if f.isFries == True:
@@ -478,7 +477,7 @@ class Graph(object):
 
 		return int(1.5 * (abs(leftX) + abs(rightX)))
 
-	"""def displayGraph(self):
+	def displayGraph(self):
 		root = Tk()
 
 		xScrollbar = Scrollbar(root, orient=HORIZONTAL)
@@ -514,14 +513,18 @@ class Graph(object):
 
 			for pair in pairs:
 				#paint pair
-				x1, y1, x2, y2 = pair
+				x1, y1, x2, y2, required = pair
 				x1 += x*20 - y*10 + xoffset
 				y1 += y*30
 				x2 += x*20 - y*10 + xoffset
 				y2 += y*30
-				canvas.create_line(x1, y1, x2, y2, fill='red', width=3)
+				if required == True:
+					lineColor = 'purple'
+				else:
+					lineColor = 'red'
+				canvas.create_line(x1, y1, x2, y2, fill=lineColor, width=3)
 
-		mainloop()"""
+		mainloop()
 
 	def toString(self):
 		self.printUpperBounds()

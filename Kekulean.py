@@ -761,7 +761,7 @@ def assignFriesAndClars(graphs):
 		graphs.assignClarsFaces()
 		return graphs 
 
-"""def displayGraphs(graphs):
+def displayGraphs(graphs):
 	if len(graphs) > 0:
 		index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))
 		while index >= 0:
@@ -773,7 +773,7 @@ def assignFriesAndClars(graphs):
 			
 			graph.displayGraph()
 			print "There are", len(graphs), "Kekule structures"
-			index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))"""
+			index = int(raw_input("what graph do you want to look at? (enter a negative number to quit) "))
 
 def savePNG(graphs, fileName):
 	#set up PIL stuff 
@@ -943,7 +943,7 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 				graphs.sort()
 				graphs.reverse()
 				
-				#displayGraphs(graphs)
+				displayGraphs(graphs)
 		else:
 			print "Not Kekulean"
 			#graphs = assignMatching(rootGraph)
