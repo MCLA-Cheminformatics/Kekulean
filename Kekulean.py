@@ -1342,7 +1342,10 @@ def _findRequiredEdges(graphs):
 	for g in graphs:
 		edgeSet = set()
 		for k, v in g.getDoubleBonds().items():
-			edge = (k, v)
+			if hash(k) < hash(v):
+				edge = (k, v)
+			else:
+				edge = (v, k)
 			edgeSet.add(edge)
 		if len(masterSet) == 0 and graphNumber == 0:
 			masterSet.update(edgeSet)
