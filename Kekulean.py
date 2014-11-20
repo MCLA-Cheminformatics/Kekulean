@@ -711,7 +711,7 @@ def assignMatching(rootGraph):
 		matchings.extend(assignBonds(rootGraph, v1, v2))"""
 
 	#alternate method, may be just as effectice, faster, and may produce no duplicates
-	v1 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP_LEFT]
+	"""v1 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP_LEFT]
 	v2 = rootGraph.getFaceGraph()[0].getVertices()[Face.BOTTOM_LEFT]
 	m1 = assignBonds(rootGraph, v1, v2)
 	matchings.extend(m1)
@@ -719,7 +719,35 @@ def assignMatching(rootGraph):
 	v3 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP_LEFT]
 	v4 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP]
 	m2 = assignBonds(rootGraph, v3, v4)
-	matchings.extend(m2)
+	matchings.extend(m2)"""
+
+	#This should grab all matchings by starting at each vertex
+	for face in rootGraph.getFaceGraph():
+		for i in [0,2,4]:
+			v1 = face.getVertices()[i]
+			v2 = face.getVertices()[i+1]
+			m = assignBonds(rootGraph, v1, v2)
+			matchings.extend(m)
+
+		d = {0:5, 2:1, 4:3}
+		for i in d:
+			v1 = face.getVertices()[i]
+			v2 = face.getVertices()[d[i]]
+			m = assignBonds(rootGraph, v1, v2)
+			matchings.extend(m)
+
+	tempMatchings = []
+
+	for pm in matchings:
+		for tpm in tempMatchings:
+			if pm.getExpandedMatching() == tpm.getExpandedMatching():
+				break
+		else:
+			tempMatchings.append(pm)
+
+	matchings = tempMatchings
+
+	#matchings = removeDuplicates(matchings)
 
 
 	graphs = []
@@ -890,7 +918,6 @@ def saveSinglePNG(graph, fileName):
 			draw.line((x1, y1, x2, y2), fill=lineColor, width=2)
 
 	image.save(fileName)
-
 
 def analyzeGraphFromFile(fileName="graph.txt"):
 	faceGraph = getInput(fileName)
@@ -1065,7 +1092,7 @@ def getRow(rl, rowNum):
 				r.append(Face(j, rowNum))
 	return r
 
-"""def removeDuplicates(matchings):
+def removeDuplicates(matchings):
 	for i in matchings:
 		for j in matchings:
 			if i != j: 
@@ -1073,7 +1100,7 @@ def getRow(rl, rowNum):
 					#This implies that the two graphs match one-for-one
 					print "deleting"
 					del matchings[matchings.index(j)]
-	return matchings"""
+	return matchings
 
 def _createRandomKekulean():
 	#creates a face graphs
