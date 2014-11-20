@@ -905,11 +905,11 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 
 		rootGraph = Graph(faceGraph, vertexGraph)
 
-		kekulean = isKekulean(rootGraph)
-		if kekulean == True:
+		graphs = assignMatching(rootGraph)
+		if len(graphs) > 0:
 			print "There are", len(vertexGraph), "vertices"
 
-			graphs = assignMatching(rootGraph)
+			#graphs = assignMatching(rootGraph)
 			print "There are", len(graphs), "PM's"			
 
 			#must be 'fries' or 'clars'
