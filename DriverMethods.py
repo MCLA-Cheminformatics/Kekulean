@@ -227,16 +227,6 @@ def getRow(rl, rowNum):
 				r.append(Face(j, rowNum))
 	return r
 
-"""def removeDuplicates(matchings):
-	for i in matchings:
-		for j in matchings:
-			if i != j: 
-				if cmp(i.getExpandedMatching(), j.getExpandedMatching()) == 0:
-					#This implies that the two graphs match one-for-one
-					print "deleting"
-					del matchings[matchings.index(j)]
-	return matchings"""
-
 def _createRandomKekulean():
 	#creates a face graphs
 	randomFaces = createRandomGraph()
