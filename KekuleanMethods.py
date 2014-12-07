@@ -9,8 +9,6 @@ from Output import *
 from Checkers import *
 
 #These methods check to see if the graph is Kekulean.
-		
-
 
 def createNewFaceGraph(rootFace):
 	oldFace = rootFace
@@ -162,64 +160,33 @@ def assignFriesAndClars(graphs):
 		graphs.assignClarsFaces()
 	return graphs 
 
-def assignMatching(rootGraph):
-	#verticalEdgeIterator = VerticalEdgeIterator(rootGraph)
-	
+def assignMatching(rootGraph):	
 	matchings = []
-	"""while verticalEdgeIterator.hasNext():		
-		v1, v2 = verticalEdgeIterator.next()
-		#v1 = findVertex(v1.getX(), v1.getY(), graph.getVertexGraph())
-		#v2 = findVertex(v2.getX(), v2.getY(), graph.getVertexGraph())
-		matchings.extend(assignBonds(rootGraph, v1, v2))"""
 
-	#alternate method, may be just as effectice, faster, and may produce no duplicates
-	"""v1 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP_LEFT]
-	v2 = rootGraph.getFaceGraph()[0].getVertices()[Face.BOTTOM_LEFT]
-	m1 = assignBonds(rootGraph, v1, v2)
-	matchings.extend(m1)
+	#This section finds all the matchings in the graph
+	face = rootGraph.getFaceGraph()[0]
 
-	v3 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP_LEFT]
-	v4 = rootGraph.getFaceGraph()[0].getVertices()[Face.TOP]
-	m2 = assignBonds(rootGraph, v3, v4)
-	matchings.extend(m2)"""
+	for i in [0,2,4]:
+		v1 = face.getVertices()[i]
+		v2 = face.getVertices()[i+1]
+		m = assignBonds(rootGraph, v1, v2)
+		matchings.extend(m)
 
-	#This should grab all matchings by starting at each vertex
-	for face in rootGraph.getFaceGraph():
-		for i in [0,2,4]:
-			v1 = face.getVertices()[i]
-			v2 = face.getVertices()[i+1]
-			m = assignBonds(rootGraph, v1, v2)
-			matchings.extend(m)
-
-		d = {0:5, 2:1, 4:3}
-		for i in d:
-			v1 = face.getVertices()[i]
-			v2 = face.getVertices()[d[i]]
-			m = assignBonds(rootGraph, v1, v2)
-			matchings.extend(m)
-
-	tempMatchings = []
-
-	for pm in matchings:
-		for tpm in tempMatchings:
-			if pm.getExpandedMatching() == tpm.getExpandedMatching():
-				break
-		else:
-			tempMatchings.append(pm)
-
-	matchings = tempMatchings
-
-	#matchings = removeDuplicates(matchings)
+	d = {0:5, 2:1, 4:3}
+	for i in d:
+		v1 = face.getVertices()[i]
+		v2 = face.getVertices()[d[i]]
+		m = assignBonds(rootGraph, v1, v2)
+		matchings.extend(m)
+ 
+	matchings = removeDuplicates(matchings)
 
 
+	#This section makes graph objects out of the matchings found.
 	graphs = []
 	for m in matchings:
 		g = copy.copy(rootGraph)
-		g.faceGraph = createNewFaceGraph(rootGraph.getFaceGraph())
-
-		#srg = set(rootGraph.getVertexGraph())
-		#sg = set(g.getVertexGraph())
-		#print 'test:', len(srg & sg) 
+		g.faceGraph = createNewFaceGraph(rootGraph.getFaceGraph()) 
 
 		g._assignFaceNeighbors()
 		g.setDoubleBonds(m.getMatching())
@@ -239,3 +206,16 @@ def assignMatching(rootGraph):
 	#ret = assignFriesAndClars(ret)
 
 	return results
+
+def removeDuplicates(matchings):
+	tempMatchings = []
+
+	for pm in matchings:
+		for tpm in tempMatchings:
+			if pm.getExpandedMatching() == tpm.getExpandedMatching():
+				break
+		else:
+			tempMatchings.append(pm)
+
+	matchings = tempMatchings
+	return matchings
