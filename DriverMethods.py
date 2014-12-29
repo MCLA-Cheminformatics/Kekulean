@@ -468,15 +468,11 @@ def testConjecture(hours=0):
 							results.write('\ngraph G: Clars: ' + str(g.getClarsNumber()) + " Number of Structures: " + str(g.getNumStructures()) + " Number of vertices: " + str(g.getNumVertices()) + "\n") 
 							results.write(str(g))
 							results.write("\n\n")
-							#conflict = True
-							#break
-						#else:
-							#print 'Conjecture holds true'
+
+							drawConflicts(g, h)
 
 		#only adds graphs to list if it under some number of vertices
 		graphList.append(h)
-
-
 
 		t2 = time.time()
 		counter += 1

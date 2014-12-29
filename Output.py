@@ -133,3 +133,23 @@ def saveSinglePNG(graph, fileName):
 			draw.line((x1, y1, x2, y2), fill=lineColor, width=2)
 
 	image.save(fileName)
+
+def drawConflicts(g1, g2):
+	folderName = str(g1.getNumVertices) + "Verts with " + str(g1.getNumStructures()) + " and " + str(g2.getNumStructures())
+
+	#setup folder
+	if not os.path.exists(folderName):
+		os.mkdir(folderName)
+		print "make folder"
+
+	else:
+		suffix = 1
+		folderName = folderName + str(suffix)
+		while os.path.exists(folderName):
+			suffix += 1
+		else:
+			os.mkdir(folderName)
+
+	print "adding"
+	saveSinglePNG(g1, folderName + "/graph1.png")
+	saveSinglePNG(g2, folderName + "/graph2.png")
