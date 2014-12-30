@@ -137,7 +137,7 @@ def saveSinglePNG(graph, fileName):
 
 def drawConflicts(g1, g2):
 
-	folderName = "ConjectureConflicts/" + str(g1.getNumVertices) + " Verts with " + str(g1.getNumStructures()) + " and " + str(g2.getNumStructures())
+	folderName = "ConjectureConflicts/" + str(g1.getNumVertices()) + " Verts with " + str(g1.getNumStructures()) + " and " + str(g2.getNumStructures())
 
 	#setup folder
 	if not os.path.exists(folderName):
