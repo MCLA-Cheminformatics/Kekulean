@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 
+import os
 import math
 
 #These methods act as a output for the program. They display the graph to the screen and create png's.
