@@ -139,12 +139,12 @@ def drawConflicts(g1, g2):
 	if not os.path.exists("ConjectureConflicts"):
 		os.mkdir("ConjectureConflicts")
 
-	folderName = "ConjectureConflicts/" + str(g1.getNumVertices()) + "Verts_with_" + str(g1.getNumStructures()) + "_and_" + str(g2.getNumStructures())
+	folderName = "ConjectureConflicts/" + str(g1.getNumVertices()) + " Verts_with_" + str(g1.getNumStructures()) + "_and_" + str(g2.getNumStructures())
 
 	#setup folder
 	if not os.path.exists(folderName):
 		os.mkdir(folderName)
-		#print "make folder"
+		print "make folder"
 
 	else:
 		suffix = 1
@@ -154,9 +154,8 @@ def drawConflicts(g1, g2):
 		else:
 			os.mkdir(folderName)
 
-	#print "adding"
+	print "adding"
 	fileName1 = folderName + "/graph1" + ".png"
 	fileName2 = folderName + "/graph2" + ".png"
-	#print fileName1
-	saveSinglePNG(g1, fileName1)
-	saveSinglePNG(g2, fileName2)
+	saveSinglePNG(g1.getGraph(), fileName1)
+	saveSinglePNG(g2.getGraph(), fileName2)

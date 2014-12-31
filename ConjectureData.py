@@ -1,8 +1,9 @@
 class ConjectureData(object):
-	def __init__ (self, numVertices, clarsNumber, numStructures):
+	def __init__ (self, numVertices, clarsNumber, numStructures, parentGraph):
 		self.numVertices = numVertices
 		self.clarsNumber = clarsNumber
 		self.numStructures = numStructures
+		self.parentGraph = parentGraph
 
 		self.string = 'empty'
 
@@ -12,6 +13,8 @@ class ConjectureData(object):
 		return self.clarsNumber
 	def getNumStructures(self):
 		return self.numStructures
+	def getGraph(self):
+		return self.parentGraph
 	def setString(self, s):
 		self.string = s
 	def __str__(self):

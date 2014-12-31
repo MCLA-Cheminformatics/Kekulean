@@ -12,8 +12,6 @@ from random import randint
 import time
 import os
 
-import multiprocessing as mp
-
 #These methods the main drivers of the program. Some of their helper methods are also present here.
 
 settings = {}
@@ -450,13 +448,19 @@ def testConjecture(hours=0):
 
 		if perfectMatchingThm == True:
 			structures = assignMatching(randomGraph)
-
+			
 			#must be 'fries' or 'clars'
 			Graph.comparison = 'clars'
 			structures.sort()
 
-			h = ConjectureData(len(structures[0].getVertexGraph()), structures[-1].getClarsNumber(), len(structures)) 
-			h.setString(structures[0].simpleToString())
+			h = structures[-1]
+			h.setNumStructures(len(structures))
+			#h.setString(structures[0].simpleToString())
+
+			#is the data right?
+			#print "Verts:", h.getNumVertices()
+			#print "Structures:", h.getNumStructures()
+			#print "Clar:", h.getFriesNumber()
 
 			for g in graphList:
 				if h.getNumVertices() == g.getNumVertices():
@@ -471,8 +475,8 @@ def testConjecture(hours=0):
 
 							drawConflicts(g, h)
 
-		#only adds graphs to list if it under some number of vertices
-		graphList.append(h)
+			#only adds graphs to list if it under some number of vertices
+			graphList.append(h)
 
 		t2 = time.time()
 		counter += 1
@@ -544,7 +548,7 @@ def findRequiredEdges(hours=0):
 			edgeFile.write(graph.simpleToString())
 			edgeFile.write("\n\n")
 
-			#save PNG's I hope
+			#save PNG's
 			fileName = "requiredEdges/Graph" + str(rqNum) + ".png"
 			saveSinglePNG(graphs[0], fileName)
 			rqNum += 1

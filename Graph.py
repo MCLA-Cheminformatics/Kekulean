@@ -24,6 +24,8 @@ class Graph(object):
 		self.FriesNumber = 0
 		self.ClarsNumber = 0
 
+		self.numStructures = 0
+
 		self.rowCount = [0] * self.getNumberOfRows()
 		self.totalUpperBounds = 0
 
@@ -64,6 +66,13 @@ class Graph(object):
 		for f in self.faceGraph:
 			if f.isClars == True:
 				self.ClarsNumber += 1
+	def getNumVertices(self):
+		return len(self.getVertexGraph())
+
+	def getNumStructures(self):
+		return self.numStructures
+	def setNumStructures(self, numStructures):
+		self.numStructures = numStructures
 
 	def getClarsFriesDiff(self):
 		return float(self.ClarsNumber)/float(self.FriesNumber)
@@ -558,6 +567,9 @@ class Graph(object):
 				string += str(face.getX())
 			firstTime = False
 		return string
+
+	def __str__(self):
+		return self.simpleToString()
 
 	def expandedToString(self):
 		row = 0
