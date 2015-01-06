@@ -7,6 +7,7 @@ from ConjectureData import *
 from Output import *
 from KekuleanMethods import *
 from Checkers import *
+from RequiredEdgeMethods import *
 
 from random import randint
 import time
@@ -487,26 +488,11 @@ def findHighestClars(graphs):
 		if g.getClarsNumber() > clars:
 			clars = g.getClarsNumber()
 	return clars
-	
+
 def _findRequiredEdges(graphs):
-	masterSet = set()
-	graphNumber = 0
-	for g in graphs:
-		edgeSet = set()
-		for k, v in g.getDoubleBonds().items():
-			if hash(k) < hash(v):
-				edge = (k, v)
-			else:
-				edge = (v, k)
-			edgeSet.add(edge)
-		if len(masterSet) == 0 and graphNumber == 0:
-			masterSet.update(edgeSet)
-		else:
-			masterSet = masterSet & edgeSet
-		graphNumber += 1
+	masterSet = getRequiredSet(graphs)
 	if len(masterSet) > 0:
 		for edge in masterSet:
-			#print edge
 			v1, v2 = edge
 			v1.required = True
 			v2.required = True
@@ -545,6 +531,7 @@ def findRequiredEdges(hours=0):
 		flag = _findRequiredEdges(graphs)
 		if flag == True:
 			print "Found graph with required edges"
+			edgeFile.write("Graph: " + str(rqNum) + "\n")
 			edgeFile.write(graph.simpleToString())
 			edgeFile.write("\n\n")
 
@@ -553,5 +540,42 @@ def findRequiredEdges(hours=0):
 			saveSinglePNG(graphs[0], fileName)
 			rqNum += 1
 
+		graphNumber += 1
+		t2 = time.time()
+
+def combineGraphs():
+	graphNumber = 0
+	storedGraphs = {}
+
+	interval = float(raw_input("How many hours would you like to run the program? "))
+
+	timeLimit = 3600 * interval
+	print "limit:", timeLimit
+
+	t1 = time.time()
+	t2 = time.time()
+
+	if t2 - t1 < timeLimit:
+		print "graph", graphNumber
+
+		flag = False
+
+		#graph = _createRandomKekulean()
+
+		#For testing
+		#fgraph = getInput("graph.txt");
+		#vgraph = makeVertexGraph(fgraph)
+		#graph = Graph(fgraph, vgraph)
+
+		matchings = assignMatching(graph)
+		
+		req_edges = getRequiredSet(matchings)
+		externalEdges = getExternalEdges(req_edges)
+
+		if len(externalEdges) > 0:
+			storedGraphs[graph] = externalEdges
+
+
+			
 		graphNumber += 1
 		t2 = time.time()

@@ -32,11 +32,11 @@ if len(sys.argv) == 2:
 	
 else:
 	while True:
-		print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Find graphs with required edges\n9) Quit"
+		print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Find graphs with required edges\n9) Combine Graphs\n10) Quit"
 		selection = int(raw_input("Selection: "))
-		while selection < 1 or selection > 9:
+		while selection < 0 and selection > 11:
 			 print "\nInvalid response, please enter a proper selection."
-			 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Find graphs with required edges\n9) Quit"
+			 print "1) Read graph from graph.txt\n2) Get a random Kekulean graph\n3) Create and test random graphs\n4) Create several Kekuleans\n5) Refresh settings\n6) Test Nelson Thm\n7) Test conjecture\n8) Find graphs with required edges\n9) Combine Graphs\n10) Quit"
 			 selection = int(raw_input("Selection: "))
 
 		if selection == 1:
@@ -56,6 +56,8 @@ else:
 			testConjecture()
 		elif selection == 8:
 			findRequiredEdges()
+		elif selection == 9:
+			combineGraphs()
 		else:
 			sys.exit()
 
