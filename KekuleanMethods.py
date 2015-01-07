@@ -164,14 +164,29 @@ def assignMatching(rootGraph):
 	matchings = []
 
 	#This section finds all the matchings in the graph
-	face = rootGraph.getFaceGraph()[0]
+	for face in rootGraph.getFaceGraph():
+		for i in [0,2,4]:
+			v1 = face.getVertices()[i]
+			v2 = face.getVertices()[i+1]
+			m = assignBonds(rootGraph, v1, v2)
+			matchings.extend(m)
+
+		d = {0:5, 2:1, 4:3}
+		for i in d:
+			v1 = face.getVertices()[i]
+			v2 = face.getVertices()[d[i]]
+			m = assignBonds(rootGraph, v1, v2)
+			matchings.extend(m)
+
+	#This section tries to miminize the faces viewed
+	"""face = rootGraph.getFaceGraph()[0]
 
 	d = {0:5, 5:0, 4:5, 5:4}
 	for i in d:
 		v1 = face.getVertices()[i]
 		v2 = face.getVertices()[d[i]]
 		m = assignBonds(rootGraph, v1, v2)
-		matchings.extend(m)
+		matchings.extend(m)"""
  
 	matchings = removeDuplicates(matchings)
 
