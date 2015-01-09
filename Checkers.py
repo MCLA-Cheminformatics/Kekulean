@@ -3,7 +3,6 @@ from Face import *
 from Vertex import *
 from Graph import *
 from VertexList import *
-from ConjectureData import *
 from Output import *
 from KekuleanMethods import *
 
