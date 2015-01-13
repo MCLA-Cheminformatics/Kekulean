@@ -148,9 +148,12 @@ def drawConflicts(g1, g2):
 
 	else:
 		suffix = 1
+		originalFolderName = folderName 
 		folderName = folderName + "(" + str(suffix) + ")"
-		while os.path.exists(folderName):
-			suffix += 1
+		while	os.path.exists(folderName):
+			folderName = originalFolderName + "(" + str(suffix) + ")"
+		 	if os.path.exists(folderName):
+				suffix += 1
 		else:
 			os.mkdir(folderName)
 
