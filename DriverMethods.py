@@ -206,8 +206,20 @@ def createRandomGraph():
 		while len(row) == 0:
 			row = getRow(rowLength, i)
 		randGraph.extend(row)
-	#print randGraph
+	
+	if checkAlignment(randGraph) == False:
+		randGraph = createRandomGraph()
 	return randGraph
+
+def checkAlignment(graph):
+	for face in graph:
+		if face.getX() == 0:
+			break
+	else:
+		#there is no face on the y-axis
+		return False
+	#there is a face on the y-axis
+	return True
 
 def createRandomConnectedGraph():
 	g = createRandomGraph()
