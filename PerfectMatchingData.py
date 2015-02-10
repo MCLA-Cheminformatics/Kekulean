@@ -1,4 +1,6 @@
 class PerfectMatchingData(object):
+	__slots__ = ['matching', 'expandedMatching']
+
 	def __init__(self, matching):
 		self.matching = matching
 

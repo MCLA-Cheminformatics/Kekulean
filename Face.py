@@ -1,4 +1,6 @@
 class Face(object):
+	__slots__ = ['vertices', 'x', 'y', 'isFries', 'isClars', 'isIsolatedFries', 'neighbors', 'visited']
+
 	#vertices
 	TOP = 0
 	TOP_RIGHT = 1

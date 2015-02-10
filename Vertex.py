@@ -1,4 +1,6 @@
 class Vertex(object):
+	__slots__ = ['neighbors', 'faces', 'x', 'y', 'visited', 'inQueue', 'root', 'rQueue', 'w', 'wx', 'wy', 'required']
+
 	LEFT = "LEFT"
 	RIGHT = "RIGHT"
 	VERTICAL = "VERTICAL"
@@ -33,4 +35,13 @@ class Vertex(object):
 		return self.neighbors
 
 	def __str__(self):
-		return str(self.getX()) + ", " + str(self.getY()) 
+		return str(self.getX()) + ", " + str(self.getY())
+
+	def __eq__(self, other):
+		if other is False:
+			return False
+		else:
+			return self.getX() == other.getX() and self.getY() == other.getY() and self.getDegree() == other.getDegree()
+
+	def __ne__(self, other):
+		return not self.__eq__(other)
