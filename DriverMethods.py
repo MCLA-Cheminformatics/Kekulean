@@ -218,7 +218,13 @@ def checkAlignment(graph):
 	else:
 		#there is no face on the y-axis
 		return False
-	#there is a face on the y-axis
+	for face in graph:
+		if face.getY() == 0:
+			break
+	else:
+		#there is no face on the x-axis
+		return False
+	#there is a face on the x-axis
 	return True
 
 def createRandomConnectedGraph():
