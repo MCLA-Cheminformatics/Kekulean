@@ -574,16 +574,29 @@ def combineGraphs():
 		#graph = _createRandomKekulean()
 
 		#For testing
-		#fgraph = getInput("graph.txt");
-		#vgraph = makeVertexGraph(fgraph)
-		#graph = Graph(fgraph, vgraph)
+		fgraph = getInput("graph.txt");
+		vgraph = makeVertexGraph(fgraph)
+		graph = Graph(fgraph, vgraph)
 
 		matchings = assignMatching(graph)
 		
 		req_edges = getRequiredSet(matchings)
 		externalEdges = getExternalEdges(req_edges)
 
+		print len(externalEdges)
+		#for edge in externalEdges:
+		#	face = (edge[0].getFaces() & edge[1].getFaces()).pop()
+		#	print face, "\t", face.getVertices().index(edge[0]), "\t", face.getVertices().index(edge[1])
+
+
+
 		if len(externalEdges) > 0:
+			for g, edges in storedGraphs:
+				complements = getComplements(externalEdges, edges)
+
+
+
+			#add graph and edges to list
 			storedGraphs[graph] = externalEdges
 
 

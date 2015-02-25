@@ -544,8 +544,14 @@ class Graph(object):
 		string += "There are " + str(len(self.vertexGraph)) + " vertices" + '\n'
 
 		string += "Number of Double Bonds: " + str(len(self.getDoubleBonds())) + '\n'
-		#for v1, v2 in self.getDoubleBonds().items():
-		#	string += str(v1) + ':' + str(v2) + '\n'	
+		
+		string += "\n"
+
+		for face in self.getFaceGraph():
+			string += "\n face: " + str(face)
+			for v in face.getVertices():
+				string += "\t" + str(v)
+
 		return string
 
 	def printUpperBounds(self):
