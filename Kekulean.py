@@ -16,8 +16,6 @@ from Checkers import *
 
 from PIL import Image, ImageDraw
 
-
-
 #The Main
 settings = getSettings()
 

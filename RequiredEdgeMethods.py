@@ -1,3 +1,5 @@
+import copy
+
 def getRequiredSet(graphs):
 	masterSet = set()
 	graphNumber = 0
@@ -25,7 +27,7 @@ def getExternalEdges(edges):
 			direction = getDirection(face, v1, v2)
 			
 			if direction is not None:
-				externalEdges.add((v1, v2))
+				externalEdges.add((v1, v2, direction))
 	return externalEdges
 
 def getDirection(face, v1, v2):
@@ -48,13 +50,54 @@ def getComplements(edgesA, edgesB):
 		for edgeB in edgesB:
 			if areComplements(edgeA, edgeB):
 				complements.add((edgeA, edgeB))
+	return complements
 
 def areComplements(edgeA, edgeB):
-	complements = {'TOP_LEFT':'BOTTOM_LEFT', 'RIGHT':'LEFT', 'TOP_RIGHT':'BOTTOM_RIGHT'}
+	complements = {'TOP_LEFT':'BOTTOM_RIGHT', 'RIGHT':'LEFT', 'TOP_RIGHT':'BOTTOM_LEFT', 'BOTTOM_LEFT':'TOP_RIGHT', 'LEFT':'RIGHT', 'BOTTOM_RIGHT':'TOP_LEFT'}
 
-	if edgeB[2] == complements[edgeA[2]]:
-		return True
-	elif edgeA[2] == complements[edgeB[2]]:
+	if edgeA[2] == complements[edgeB[2]]:
 		return True
 	else:
 		return False
+
+def offsetFaces(g, xOffset, yOffset):
+	graph = copy.copy(g)
+
+	for face in graph.getFaceGraph():
+		face.x += xOffset
+		face.y += yOffset
+
+	return graph
+
+#returns true if there is an overlap, false otherwise
+def checkFaceOverlap(g1, g2):
+	faces = g1.getFaceGraph() + g2.getFaceGraph()
+
+	positions = []
+	overlap = False
+
+	for face in faces:
+		if len(positions) > 0:
+			for p in positions:
+				if face.getX() == p[0] and face.getY() == p[1]:
+					overlap = True
+					break
+			if overlap == True:
+				break
+		positions.append((face.getX(), face.getY()))
+	return overlap;
+
+def adjustForNegatives(faceGraph):
+	xneg = 0;
+	yneg = 0;
+
+	for face in faceGraph:
+		if face.getX() < xneg:
+			xneg = face.getX()
+		if face.getY() < yneg:
+			yneg = face.getY()
+
+	for face in faceGraph:
+		face.x += abs(xneg)
+		face.y += abs(yneg)
+	return faceGraph

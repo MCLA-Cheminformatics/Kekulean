@@ -562,6 +562,7 @@ def findRequiredEdges(hours=0):
 
 def combineGraphs():
 	graphNumber = 0
+	superGraphNumber = 0
 	storedGraphs = {}
 
 	interval = float(raw_input("How many hours would you like to run the program? "))
@@ -572,40 +573,100 @@ def combineGraphs():
 	t1 = time.time()
 	t2 = time.time()
 
-	if t2 - t1 < timeLimit:
+	while t2 - t1 < timeLimit:
 		print "graph", graphNumber
 
 		flag = False
 
-		#graph = _createRandomKekulean()
+		graph = _createRandomKekulean()
 
 		#For testing
-		fgraph = getInput("graph.txt");
-		vgraph = makeVertexGraph(fgraph)
-		graph = Graph(fgraph, vgraph)
+		#fgraph = getInput("graph.txt");
+		#vgraph = makeVertexGraph(fgraph)
+		#graph = Graph(fgraph, vgraph)
 
 		matchings = assignMatching(graph)
 		
 		req_edges = getRequiredSet(matchings)
 		externalEdges = getExternalEdges(req_edges)
 
-		print len(externalEdges)
+		#print len(externalEdges)
 		#for edge in externalEdges:
 		#	face = (edge[0].getFaces() & edge[1].getFaces()).pop()
 		#	print face, "\t", face.getVertices().index(edge[0]), "\t", face.getVertices().index(edge[1])
 
-
-
 		if len(externalEdges) > 0:
-			for g, edges in storedGraphs:
-				complements = getComplements(externalEdges, edges)
-
-
-
 			#add graph and edges to list
 			storedGraphs[graph] = externalEdges
 
+			for g, edges in storedGraphs.items():
+				complements = getComplements(externalEdges, edges)
 
-			
+				#print "len", len(complements)
+				for edge, compEdge in complements:
+					faceA = (edge[0].getFaces() & edge[1].getFaces()).pop()
+					#print compEdge
+					faceB = (compEdge[0].getFaces() & compEdge[1].getFaces()).pop()
+					
+					x = faceA.getX() - faceB.getX()
+					y = faceA.getY() - faceB.getY()
+					print "A:   x:", faceA.x, "y:", faceA.y
+					print "B:   x:", faceB.x, "y:", faceB.y
+					print "xdiff:", x, "ydiff:", y
+					if edge[2] == "TOP_RIGHT" and compEdge[2] == "BOTTOM_LEFT":
+						newGraph = offsetFaces(g, x, y + 1);
+					elif edge[2] == "RIGHT" and compEdge[2] == "LEFT":
+						newGraph = offsetFaces(g, x + 1, y);
+					elif edge[2] == "TOP_LEFT" and compEdge[2] == "BOTTOM_RIGHT":
+						newGraph = offsetFaces(g, x + 1, y + 1);
+
+					elif edge[2] == "BOTTOM_LEFT" and compEdge[2] == "TOP_RIGHT":
+						newGraph = offsetFaces(g, x, y - 1);
+					elif edge[2] == "LEFT" and compEdge[2] == "RIGHT":
+						newGraph = offsetFaces(g, x - 1, y);
+					elif edge[2] == "BOTTOM_RIGHT" and compEdge[2] == "TOP_LEFT":
+						newGraph = offsetFaces(g, x - 1, y - 1);
+
+					overlap = checkFaceOverlap(graph, newGraph)
+					print overlap
+					if overlap is False:
+						faceGraph = graph.getFaceGraph() + newGraph.getFaceGraph()
+						faceGraph = adjustForNegatives(faceGraph)
+								
+						vertexGraph = makeVertexGraph(faceGraph)
+						superGraph = Graph(faceGraph, vertexGraph)
+
+						if not os.path.exists("CombinedGraphs"):
+							os.mkdir("CombinedGraphs")
+
+						folderName = "CombinedGraphs/superGraph" + str(graphNumber)
+						#setup folder
+						if not os.path.exists(folderName):
+							os.mkdir(folderName)
+
+						#save PNG's
+						superName = folderName + "/superGraph.png"
+						saveSinglePNG(superGraph, superName)
+
+						graphName = folderName + "/graphA.png"
+						saveSinglePNG(graph, graphName)
+
+						graphName = folderName + "/graphB.png"
+						saveSinglePNG(newGraph, graphName)
+
+						f = open(folderName + "/graphs.txt", 'w')
+						f.write('graph A\n')
+						f.write(str(graph) + '\n\n')
+
+						f.write('graph B\n')
+						f.write(str(newGraph) + '\n\n')
+
+						f.write('super graph\n')
+						f.write(str(superGraph) + '\n')
+
+						f.close()
+
+						superGraphNumber += 1
+
 		graphNumber += 1
 		t2 = time.time()
