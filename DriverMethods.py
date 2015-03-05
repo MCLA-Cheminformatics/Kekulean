@@ -610,9 +610,9 @@ def combineGraphs():
 					
 					x = faceA.getX() - faceB.getX()
 					y = faceA.getY() - faceB.getY()
-					print "A:   x:", faceA.x, "y:", faceA.y
-					print "B:   x:", faceB.x, "y:", faceB.y
-					print "xdiff:", x, "ydiff:", y
+					#print "A:   x:", faceA.x, "y:", faceA.y
+					#print "B:   x:", faceB.x, "y:", faceB.y
+					#print "xdiff:", x, "ydiff:", y
 					if edge[2] == "TOP_RIGHT" and compEdge[2] == "BOTTOM_LEFT":
 						newGraph = offsetFaces(g, x, y + 1);
 					elif edge[2] == "RIGHT" and compEdge[2] == "LEFT":
