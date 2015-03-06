@@ -7,7 +7,7 @@ from DriverMethods import *
 from Output import *
 from Checkers import *
 
-#These methods check to see if the graph is Kekulean.
+#These methods are used to help make Kekulean graphs.
 
 def createNewFaceGraph(rootFace):
 	oldFace = rootFace
@@ -146,7 +146,6 @@ def assignBonds(graph, v1, v2, matching=None, visitedVerts=None):
 		matchingsList.append(PerfectMatchingData(matchings))
 	
 	return matchingsList
-
 
 def assignFriesAndClars(graphs):
 	try: 
