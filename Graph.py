@@ -10,6 +10,7 @@ import copy
 class Graph(object):
 	__slots__ = ['faceGraph', 'vertexGraph', 'doubleBonds', 'vertexRoots', 'lastAddPair', 'FriesNumber', 'ClarsNumber', 'numStructures', 'rowCount', 'totalUpperBounds', 'leftMostFace', 'rightMostFace', 'setList']
 
+	#This is a class-wide attribute
 	comparison = 'fries'
 
 	def __init__(self, faceGraph, vertexGraph):
