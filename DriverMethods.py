@@ -589,6 +589,10 @@ def combineGraphs():
 			matchings = assignMatching(graph)
 		graph.numStructures = len(matchings)
 
+		Graph.comparison = 'clars'
+		matchings.sort()
+		graph.maxClars = matchings[-1].getClarsNumber()
+
 		#For testing
 		#fgraph = getInput("graph.txt");
 		#vgraph = makeVertexGraph(fgraph)
@@ -655,6 +659,9 @@ def combineGraphs():
 								os.mkdir(folderName)
 
 							superGraph.numStructures = len(matchings)
+							Graph.comparison = 'clars'
+							matchings.sort()
+							superGraph.maxClars = matchings[-1].getClarsNumber()
 
 							saveCombinedGraphs(folderName, superGraph, graph, newGraph)
 
@@ -667,15 +674,15 @@ def saveCombinedGraphs(folderName, superGraph, graph, newGraph):
 	f = open(folderName + "/graphs.txt", 'w')
 	f.write('graph A\n')
 	f.write(str(graph) + '\n')
-	f.write("structures: " + str(graph.numStructures) + " Max Clar: " + str(graph.getClarsNumber()) + '\n\n')
+	f.write("structures: " + str(graph.numStructures) + " Max Clar: " + str(graph.maxClars) + '\n\n')
 
 	f.write('graph B\n')
 	f.write(str(newGraph) + '\n')
-	f.write("structures: " + str(newGraph.numStructures) + " Max Clar: " + str(newGraph.getClarsNumber()) + '\n\n')
+	f.write("structures: " + str(newGraph.numStructures) + " Max Clar: " + str(newGraph.maxClars) + '\n\n')
 
 	f.write('super graph\n')
 	f.write(str(superGraph) + '\n')
-	f.write("structures: " + str(superGraph.numStructures) + " Max Clar: " + str(superGraph.getClarsNumber()) + '\n\n')
+	f.write("structures: " + str(superGraph.numStructures) + " Max Clar: " + str(superGraph.maxClars) + '\n\n')
 
 	f.close()
 
