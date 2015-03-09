@@ -261,7 +261,11 @@ def _createRandomKekulean():
 
 		vertexGraph = makeVertexGraph(randomFaces)
 		randomGraph = Graph(randomFaces, vertexGraph)
-	return randomGraph
+
+	if isKekulean(randomGraph):
+		return randomGraph
+	else:
+		return _createRandomKekulean()
 
 def createManyKekuleans():
 	graphs = [] #list of kekulean graphs 
@@ -579,14 +583,17 @@ def combineGraphs():
 		flag = False
 
 		graph = _createRandomKekulean()
+		matchings = assignMatching(graph)
+		while len(matchings) == 0:
+			graph = _createRandomKekulean()
+			matchings = assignMatching(graph)
+		graph.numStructures = len(matchings)
 
 		#For testing
 		#fgraph = getInput("graph.txt");
 		#vgraph = makeVertexGraph(fgraph)
 		#graph = Graph(fgraph, vgraph)
 
-		matchings = assignMatching(graph)
-		
 		req_edges = getRequiredSet(matchings)
 		externalEdges = getExternalEdges(req_edges)
 
@@ -628,7 +635,7 @@ def combineGraphs():
 						newGraph = offsetFaces(g, x - 1, y - 1);
 
 					overlap = checkFaceOverlap(graph, newGraph)
-					print overlap
+					#print overlap
 					if overlap is False:
 						faceGraph = graph.getFaceGraph() + newGraph.getFaceGraph()
 						faceGraph = adjustForNegatives(faceGraph)
@@ -636,37 +643,65 @@ def combineGraphs():
 						vertexGraph = makeVertexGraph(faceGraph)
 						superGraph = Graph(faceGraph, vertexGraph)
 
-						if not os.path.exists("CombinedGraphs"):
-							os.mkdir("CombinedGraphs")
+						matchings = assignMatching(superGraph)
 
-						folderName = "CombinedGraphs/superGraph" + str(graphNumber)
-						#setup folder
-						if not os.path.exists(folderName):
-							os.mkdir(folderName)
+						if len(matchings) > 0:
+							if not os.path.exists("CombinedGraphs"):
+								os.mkdir("CombinedGraphs")
 
-						#save PNG's
-						superName = folderName + "/superGraph.png"
-						saveSinglePNG(superGraph, superName)
+							folderName = "CombinedGraphs/superGraph" + str(graphNumber)
+							#setup folder
+							if not os.path.exists(folderName):
+								os.mkdir(folderName)
 
-						graphName = folderName + "/graphA.png"
-						saveSinglePNG(graph, graphName)
+							superGraph.numStructures = len(matchings)
 
-						graphName = folderName + "/graphB.png"
-						saveSinglePNG(newGraph, graphName)
+							saveCombinedGraphs(folderName, superGraph, graph, newGraph)
 
-						f = open(folderName + "/graphs.txt", 'w')
-						f.write('graph A\n')
-						f.write(str(graph) + '\n\n')
-
-						f.write('graph B\n')
-						f.write(str(newGraph) + '\n\n')
-
-						f.write('super graph\n')
-						f.write(str(superGraph) + '\n')
-
-						f.close()
-
-						superGraphNumber += 1
+							superGraphNumber += 1
 
 		graphNumber += 1
 		t2 = time.time()
+
+def saveCombinedGraphs(folderName, superGraph, graph, newGraph):
+	f = open(folderName + "/graphs.txt", 'w')
+	f.write('graph A\n')
+	f.write(str(graph) + '\n')
+	f.write("structures: " + str(graph.numStructures) + " Max Clar: " + str(graph.getClarsNumber()) + '\n\n')
+
+	f.write('graph B\n')
+	f.write(str(newGraph) + '\n')
+	f.write("structures: " + str(newGraph.numStructures) + " Max Clar: " + str(newGraph.getClarsNumber()) + '\n\n')
+
+	f.write('super graph\n')
+	f.write(str(superGraph) + '\n')
+	f.write("structures: " + str(superGraph.numStructures) + " Max Clar: " + str(superGraph.getClarsNumber()) + '\n\n')
+
+	f.close()
+
+	saveCombinedPNGs(folderName, superGraph, graph, newGraph)
+
+def saveCombinedPNGs(folderName, superGraph, graph, newGraph):
+	#get Max Clar graph for superGraph
+	Graph.comparison = 'clars'
+	print"Super:", superGraph.numStructures
+
+	#save PNG's
+	superName = folderName + "/superGraph.png"
+	saveSinglePNG(superGraph, superName)
+
+	#get Max Clar graph for graph A
+	matchings = assignMatching(graph)
+	print"A:", graph.numStructures
+
+	#save PNG
+	graphName = folderName + "/graphA.png"
+	saveSinglePNG(graph, graphName)
+
+	#get Max Clar graph for graph B
+	matchings = assignMatching(newGraph)
+	print"B:", newGraph.numStructures
+
+	#save PNG
+	graphName = folderName + "/graphB.png"
+	saveSinglePNG(newGraph, graphName)
