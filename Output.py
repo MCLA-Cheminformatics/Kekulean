@@ -88,7 +88,7 @@ def saveSinglePNG(graph, fileName):
 	#Calculate PNG width 
 	width = graph.getWidth() * 2
 	#calculate PNG height
-	height = graph.getNumberOfRows() * 50
+	height = graph.getNumberOfRows() * 75
 
 	image = Image.new("RGB", (width, height), (255,255,255))
 	draw = ImageDraw.Draw(image)
