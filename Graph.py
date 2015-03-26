@@ -8,7 +8,7 @@ import copy
 #add proper support for sorting
 #make comparison a static member
 class Graph(object):
-	__slots__ = ['faceGraph', 'vertexGraph', 'doubleBonds', 'vertexRoots', 'lastAddPair', 'FriesNumber', 'ClarsNumber', 'numStructures', 'rowCount', 'totalUpperBounds', 'leftMostFace', 'rightMostFace', 'setList']
+	__slots__ = ['faceGraph', 'vertexGraph', 'doubleBonds', 'vertexRoots', 'lastAddPair', 'FriesNumber', 'ClarsNumber', 'maxClars', 'numStructures', 'rowCount', 'totalUpperBounds', 'leftMostFace', 'rightMostFace', 'setList']
 
 	#This is a class-wide attribute
 	comparison = 'fries'
@@ -25,6 +25,8 @@ class Graph(object):
 
 		self.FriesNumber = 0
 		self.ClarsNumber = 0
+
+		self.maxClars = 0
 
 		self.numStructures = 0
 

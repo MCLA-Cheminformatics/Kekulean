@@ -69,6 +69,35 @@ def offsetFaces(g, xOffset, yOffset):
 
 	return graph
 
+def combineFaces(graphA, graphB):
+	masterFaceGraph = []
+
+	#Add graphA to list
+	for face in graphA.getFaceGraph():
+		for f in masterFaceGraph:
+			if face.getY() <= f.getY():
+				if face.getX() < f.getX():
+					#insert face where f was in list
+					masterFaceGraph.insert(masterFaceGraph.index(f), face)
+					break
+		#if the face does not come before any of the other faces, then add it to the end.
+		else:
+			masterFaceGraph.append(face)
+
+	#Add graphB to list
+	for face in graphB.getFaceGraph():
+		for f in masterFaceGraph:
+			if face.getY() <= f.getY():
+				if face.getX() < f.getX():
+					#insert face where f was in list
+					masterFaceGraph.insert(masterFaceGraph.index(f), face)
+					break
+		#if the face does not come before any of the other faces, then add it to the end.
+		else:
+			masterFaceGraph.append(face)
+	return masterFaceGraph
+	
+
 #returns true if there is an overlap, false otherwise
 def checkFaceOverlap(g1, g2):
 	faces = g1.getFaceGraph() + g2.getFaceGraph()

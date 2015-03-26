@@ -47,59 +47,29 @@ def assignComponents(g):
 def checkConnected(d, g):
 
 	totalFaceCount = getNumFaces(g)
-	compList = list(range(totalFaceCount))
+	queue = []
 
-	for i in range(len(g)):
-		dualRow = d[i]
-		row = g[i]
-		for j in range(len(row)):
-			face = row[j]
-			#For the face to the right
-			if j < len(row)-1:
-				otherFace = row[j+1]
-				if (otherFace - 1) == face:
-					d.remove(dualRow)
-					comp = getLower(dualRow[j], dualRow[j+1])
-					reassignComps(compList, comp, dualRow[j], dualRow[j+1])
-					dualRow[j] = comp
-					dualRow[j+1] = comp
-					d.insert(i, dualRow)
-			#For the faces below
-			if i < len(g)-1:
-				belowRow = g[i+1]
-				belowDualRow = d[i+1]
-				try:
-					otherFace = belowRow[j]
-				except:
-					otherFace = None
-				if otherFace != None:
-					#For the face down and to the left
-					if otherFace == face or (otherFace-1) == face:
-						d.remove(dualRow)
-						d.remove(belowDualRow)
-						comp = getLower(dualRow[j], belowDualRow[j])
-						reassignComps(compList, comp, dualRow[j], belowDualRow[j])
-						dualRow[j] = comp
-						belowDualRow[j] = comp
-						d.insert(i, dualRow)
-						d.insert(i+1, belowDualRow)
-				try:
-					otherFace = belowRow[j+1]
-				except:
-					otherFace = None
-				if otherFace != None:
-					#for the face down and to the left
-					if (otherFace - 1) == face or otherFace == face:
-						d.remove(dualRow)
-						d.remove(belowDualRow)
-						comp = getLower(dualRow[j], belowDualRow[j+1])
-						reassignComps(compList, comp, dualRow[j], belowDualRow[j+1])
-						dualRow[j] = comp
-						belowDualRow[j+1] = comp
-						d.insert(i, dualRow)
-						d.insert(i+1, belowDualRow)
+	#make faceGraph
+	faceGraph = []
+	y = 0
+	while y < len(g):
+		row = g[y]		
+		for x in row:
+			faceGraph.append((Face(int(x), y)))
+		y += 1
 
-	return _checkConnected(compList)
+	vg = makeVertexGraph(faceGraph)
+	graph = Graph(faceGraph, vg)
+		
+	queue.append(graph.getFaceGraph()[0])
+
+	while len(queue) > 0 and len(graph.getFaceGraph()) > 0:
+		face = queue.pop(0)
+		queue.extend(face.getNeighbors())
+		if face in graph.getFaceGraph():
+			graph.getFaceGraph().remove(face)
+		#print len(graph.getFaceGraph()), len(queue)
+	return len(graph.getFaceGraph()) == 0
 
 #using a seperate component list, the graph is detrimened to be connected if all faces have the same component. Which sould be zero
 def getNumFaces(g):
@@ -116,19 +86,6 @@ def reassignComps(compList, newValue, dual1, dual2):
 			compList[i] = newValue
 	return compList
 
-#checks if graph is connected if compList (or d) is all of one component
-def _checkConnected(d):
-	flag = True
-
-	if d.count(0) != len(d):
-		flag = False
-	return flag					
-
-def getLower(f1, f2):
-	if f1 <= f2:
-		return f1
-	else:
-		return f2
 
 #This requires a vertex graph
 def makeVertexGraph(faceGraph):

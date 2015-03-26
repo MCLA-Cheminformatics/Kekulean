@@ -65,6 +65,7 @@ def analyzeGraphFromFile(fileName="graph.txt"):
 
 		rootGraph = Graph(faceGraph, vertexGraph)
 
+		print "Assigning Matchings"
 		graphs = assignMatching(rootGraph)
 		if len(graphs) > 0:
 			print "There are", len(vertexGraph), "vertices"
@@ -485,7 +486,7 @@ def testConjecture(hours=0):
 			#print "Clar:", h.getFriesNumber()
 
 			for g in graphList:
-				if h.getNumVertices() == g.getNumVertices():
+				if h.getNumVertices() == g.getNumVertices() and h.getNumVertices() <= 26:
 					if h.getNumStructures() < g.getNumStructures():
 						if h.getClarsNumber() > g.getClarsNumber():
 							print 'Conjecture is false:'
@@ -641,7 +642,7 @@ def combineGraphs():
 					overlap = checkFaceOverlap(graph, newGraph)
 					#print overlap
 					if overlap is False:
-						faceGraph = graph.getFaceGraph() + newGraph.getFaceGraph()
+						faceGraph = combineFaces(graph, newGraph)
 						faceGraph = adjustForNegatives(faceGraph)
 								
 						vertexGraph = makeVertexGraph(faceGraph)
@@ -661,6 +662,7 @@ def combineGraphs():
 							superGraph.numStructures = len(matchings)
 							Graph.comparison = 'clars'
 							matchings.sort()
+							print "super len:", len(matchings)
 							superGraph.maxClars = matchings[-1].getClarsNumber()
 
 							saveCombinedGraphs(folderName, superGraph, graph, newGraph)
