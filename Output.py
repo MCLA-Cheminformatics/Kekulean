@@ -144,22 +144,9 @@ def drawConflicts(g1, g2):
 	#setup folder
 	if not os.path.exists(folderName):
 		os.mkdir(folderName)
-		#print "make folder"
-
-	else:
-		suffix = 1
-		originalFolderName = folderName 
-		folderName = folderName + "(" + str(suffix) + ")"
-		while	os.path.exists(folderName):
-			folderName = originalFolderName + "(" + str(suffix) + ")"
-		 	if os.path.exists(folderName):
-				suffix += 1
-		else:
-			os.mkdir(folderName)
-
-	#print "adding"
-	fileName1 = folderName + "/graph1" + ".png"
-	fileName2 = folderName + "/graph2" + ".png"
-	#print fileName1
-	saveSinglePNG(g1, fileName1)
-	saveSinglePNG(g2, fileName2)
+		#print "adding"
+		fileName1 = folderName + "/graph1" + ".png"
+		fileName2 = folderName + "/graph2" + ".png"
+		#print fileName1
+		saveSinglePNG(g1, fileName1)
+		saveSinglePNG(g2, fileName2)
