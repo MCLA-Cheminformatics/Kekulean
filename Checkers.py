@@ -62,14 +62,34 @@ def checkConnected(d, g):
 	graph = Graph(faceGraph, vg)
 		
 	queue.append(graph.getFaceGraph()[0])
+	visited = set()
 
-	while len(queue) > 0 and len(graph.getFaceGraph()) > 0:
+	while len(visited) < len(graph.getFaceGraph()):
 		face = queue.pop(0)
-		queue.extend(face.getNeighbors())
-		if face in graph.getFaceGraph():
-			graph.getFaceGraph().remove(face)
-		#print len(graph.getFaceGraph()), len(queue)
-	return len(graph.getFaceGraph()) == 0
+		while face in visited:
+			#print "in while"
+			if len(queue) > 0:
+				face = queue.pop(0)
+			else:
+				break
+		#this means that the face is visited and grpah is disconnected	
+		if face in visited:
+			break
+
+		nextGroup = face.getNeighbors()
+		if len(nextGroup) == 0:
+			break
+		else:
+			queue.extend(nextGroup)
+
+		#print "stats"
+		#print len(graph.getFaceGraph()), len(queue), len(visited)
+		visited.add(face)
+
+		#print "graph"
+		#print graph
+		#print "-------------------"
+	return len(graph.getFaceGraph()) == len(visited)
 
 #using a seperate component list, the graph is detrimened to be connected if all faces have the same component. Which sould be zero
 def getNumFaces(g):

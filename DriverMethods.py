@@ -11,6 +11,7 @@ from RequiredEdgeMethods import *
 from random import randint
 import time
 import os
+import multiprocessing as mp
 
 #These methods the main drivers of the program. Some of their helper methods are also present here.
 
@@ -486,7 +487,7 @@ def testConjecture(hours=0):
 			#print "Clar:", h.getFriesNumber()
 
 			for g in graphList:
-				if h.getNumVertices() == g.getNumVertices() and h.getNumVertices() <= 26:
+				if h.getNumVertices() == g.getNumVertices() :#and h.getNumVertices() <= 26:
 					if h.getNumStructures() < g.getNumStructures():
 						if h.getClarsNumber() > g.getClarsNumber():
 							print 'Conjecture is false:'
